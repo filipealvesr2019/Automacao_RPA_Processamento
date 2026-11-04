@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Corporativo de Gestão de Pedidos | ERP Demo</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="brand">
+        <div class="brand-logo">ERP</div>
+        <div class="brand-text">
+          <h1>Nexus ERP Corporativo</h1>
+          <span>Módulo de Gestão de Pedidos & Faturamento</span>
+        </div>
+      </div>
+      <div class="badge-env">
+        <span class="status-dot"></span>
+        <span>Ambiente Local • RPA Target</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <!-- Feedback / Alerta de Status para Captura do Robô -->
+    <section id="feedback-section" class="feedback-card hidden" aria-live="polite">
+      <div class="feedback-icon" id="feedback-icon">✓</div>
+      <div class="feedback-content">
+        <h4 id="feedback-title">Status da Operação</h4>
+        <p id="feedback-message">Mensagem de retorno do sistema.</p>
+        <div id="protocolo-wrapper" class="protocolo-box hidden">
+          <span class="protocolo-label">Número de Protocolo:</span>
+          <span id="numero-protocolo" class="protocolo-code">PRT-0000-0000</span>
+        </div>
+      </div>
+      <button type="button" class="btn-close-feedback" id="btn-close-feedback" title="Fechar">×</button>
+    </section>
+
+    <div class="grid-layout">
+      <!-- Formulário de Cadastro -->
+      <section class="card form-card">
+        <div class="card-header">
+          <h2>Novo Cadastro de Pedido</h2>
+          <p>Preencha os dados obrigatórios para emissão do pedido corporativo.</p>
+        </div>
+
+        <form id="form-pedido" novalidate>
+          <div class="form-group">
+            <label for="input-pedido-id">ID do Pedido <span class="required">*</span></label>
+            <input type="text" id="input-pedido-id" name="pedidoId" placeholder="Ex: PED-1001" required autocomplete="off">
+            <span class="field-hint">Deve ser um identificador único no sistema.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-cliente-nome">Nome do Cliente <span class="required">*</span></label>
+            <input type="text" id="input-cliente-nome" name="clienteNome" placeholder="Ex: Metalúrgica Silva Ltda" required autocomplete="off">
+          </div>
+
+          <div class="form-group">
+            <label for="input-produto">Produto / Item <span class="required">*</span></label>
+            <input type="text" id="input-produto" name="produto" placeholder="Ex: Cabo de Aço Galvanizado 10mm" required autocomplete="off">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-half">
+              <label for="input-quantidade">Quantidade <span class="required">*</span></label>
+              <input type="number" id="input-quantidade" name="quantidade" min="1" step="1" placeholder="Ex: 5" required>
+            </div>
+
+            <div class="form-group col-half">
+              <label for="input-valor-unitario">Valor Unitário (R$) <span class="required">*</span></label>
+              <input type="number" id="input-valor-unitario" name="valorUnitario" min="0.01" step="0.01" placeholder="Ex: 150.50" required>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" id="btn-limpar" class="btn btn-secondary">Limpar Campos</button>
+            <button type="submit" id="btn-cadastrar" class="btn btn-primary">Cadastrar Pedido</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Painel de Consulta e Estatísticas -->
+      <section class="card table-card">
+        <div class="card-header flex-between">
+          <div>
+            <h2>Consulta de Pedidos Registrados</h2>
+            <p>Auditoria em tempo real dos pedidos recebidos no sistema.</p>
+          </div>
+          <div class="header-actions">
+            <span class="counter-badge" id="total-registros">0 pedidos</span>
+            <button type="button" id="btn-resetar-banco" class="btn btn-danger-outline" title="Limpar todos os dados salvos para reiniciar testes">Resetar Base</button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table" id="tabela-pedidos">
+            <thead>
+              <tr>
+                <th>ID Pedido</th>
+                <th>Cliente</th>
+                <th>Produto</th>
+                <th>Qtd</th>
+                <th>Unitário</th>
+                <th>Total</th>
+                <th>Protocolo</th>
+                <th>Data/Hora</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-corpo">
+              <!-- Linhas inseridas via JS -->
+              <tr id="linha-vazia">
+                <td colspan="8" class="text-center empty-state">Nenhum pedido registrado até o momento.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>Nexus ERP v2.4 • Módulo de Homologação para Automação Robótica de Processos (RPA)</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
+
