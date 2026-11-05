@@ -37,7 +37,7 @@ O objetivo deste projeto é construir uma automação RPA profissional, robusta 
 
 1. **Entrada:** `Data/Input/Pedidos_Input.xlsx` contendo a fila de pedidos diários.
 2. **Processamento:** Robô UiPath valida a integridade de cada registro.
-3. **Destino:** Formulário web local (`http://localhost:8000`), cadastrando pedidos válidos e coletando o protocolo.
+3. **Destino:** Formulário web local (`http://localhost:8080`), cadastrando pedidos válidos e coletando o protocolo.
 4. **Saída:** `Data/Output/Relatorio_Processamento.xlsx` com abas de sucesso, erros e ignorados.
 
 ---
@@ -59,7 +59,7 @@ O objetivo deste projeto é construir uma automação RPA profissional, robusta 
 
 ### Dia 1 — Fundação, Ambiente e Dados
 * **Etapa 1 — Definir o processo:**
-  - Sistema alvo definido: *Nexus ERP Corporativo* rodando em servidor local (`http://localhost:8000`).
+  - Sistema alvo definido: *Nexus ERP Corporativo* rodando em servidor local (`http://localhost:8080`).
   - Documento de processo e regras aprovados.
   - *Entrega:* Portal web criado + Documento de requisitos atualizado.
 * **Etapa 2 — Preparar o ambiente:**
@@ -76,7 +76,7 @@ O objetivo deste projeto é construir uma automação RPA profissional, robusta 
   - Classificação em Válidos, Inválidos e Cancelados (apenas em memória e logs, sem submissão).
   - *Entrega:* Output do UiPath comprovando a correta segregação.
 * **Etapa 5 — Automatizar o cadastro web:**
-  - Abertura de navegador e navegação até `http://localhost:8000`.
+  - Abertura de navegador e navegação até `http://localhost:8080`.
   - Preenchimento dos campos mapeados e envio.
   - Captura do protocolo retornado (`PRT-2026-XXXX`).
   - *Entrega:* Pedidos válidos inseridos e visíveis na tabela do portal.

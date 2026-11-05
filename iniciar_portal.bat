@@ -5,12 +5,12 @@ echo ======================================================
 echo    NEXUS ERP CORPORATIVO - SERVIDOR LOCAL (RPA TARGET)
 echo ======================================================
 echo.
-echo Iniciando servidor HTTP na porta 8000...
-echo Abrindo navegador em http://localhost:8000
+echo Iniciando servidor HTTP na porta 8080...
+echo Abrindo navegador em http://localhost:8080
 echo.
 echo Pressione Ctrl + C nesta janela para encerrar o servidor.
 echo ------------------------------------------------------
 
-start http://localhost:8000
-python -m http.server 8000 --directory PortalWeb
+start http://localhost:8080
+python -m http.server 8080 --directory PortalWeb
 
