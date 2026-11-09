@@ -1,0 +1,50 @@
+# Bancos de Dados SQLite
+*.db
+*.sqlite
+*.sqlite3
+test_*.db
+
+# Python Bytecode e Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.pyd
+
+# Ambientes Virtuais
+venv/
+.venv/
+env/
+ENV/
+
+# Arquivos de Build e Distribuição
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+
+# Testes e Cobertura
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Variáveis de Ambiente e Segredos
+.env
+.env.*
+!.env.example
+
+# Arquivos Temporários de Sistema
+*.log
+*.tmp
+*.bak
+.DS_Store
+Thumbs.db
+
+# UiPath Arquivos Locais e de Cache
+.local/
+.settings/
+.tmh/
+project.uiproj
+
