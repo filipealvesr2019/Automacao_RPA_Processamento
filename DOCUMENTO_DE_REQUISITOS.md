@@ -1,34 +1,41 @@
 # Documento de Requisitos e Especificação do Projeto RPA
 
 **Projeto:** Automação de Processamento de Pedidos e Cadastro Corporativo (ERP)  
-**Ferramenta Principal:** UiPath Studio  
+**Ferramenta Principal:** UiPath Studio & UiPath Orchestrator Cloud  
 **Assistente de Desenvolvimento:** Antigravity  
 **Metodologia:** Desenvolvimento Guiado por Evidências (Gate-Check em 7 Etapas)  
-**Modalidade:** Automação Sob Demanda (*Attended Trigger* com Execução Autônoma)  
-**Prazo:** 3 Dias  
+**Modalidade:** Automação sob demanda via Portal Web, com execução Unattended gerenciada pelo UiPath Orchestrator  
+**Prazo:** 3 Dias (Meta MVP, priorizando validações de arquitetura)  
 
 ---
 
 ## 1. Visão Geral e Princípios de Desenvolvimento
 
-O objetivo deste projeto é construir uma automação RPA profissional, robusta e pronta para portfólio, demonstrando o fluxo completo de uma operação empresarial moderna em camadas:
-- Interface corporativa (*Nexus ERP*) com área de **Upload de Planilha de Pedidos** e painel de controle;
-- Disparo sob demanda do robô UiPath através do botão **"Processar Pedidos"**;
-- Execução 100% autônoma pelo UiPath (leitura, auditoria de regras de negócio, preenchimento web e captura de comprovantes);
-- Backend em **Python** com dupla validação de integridade e persistência transacional em banco **SQLite** (`nexus_erp.db`);
-- Emissão oficial do protocolo pelo backend;
-- Monitoramento de ciclo de vida e disponibilização de download do **Relatório Consolidado de Auditoria** (`Relatorio_Processamento.xlsx`) no próprio portal.
+O objetivo deste projeto é construir uma automação RPA de padrão corporativo para portfólio de **RPA Júnior**, demonstrando não apenas automação de interface no Studio, mas domínio de arquitetura integrada em camadas:
+- Interface corporativa (*Nexus ERP*) com upload de planilha e acompanhamento de status em tempo real;
+- Backend em **Python** para controle de execução, concorrência e integração com o Orchestrator;
+- Orquestração centralizada via **UiPath Orchestrator Cloud** acionado por **API Trigger** (OAuth 2.0);
+- Execução autônoma pelo **UiPath Robot** na máquina Windows;
+- Persistência transacional com banco **SQLite** (`nexus_erp.db`) e emissão de protocolos pelo backend;
+- Disponibilização do **Relatório Consolidado de Auditoria** (`Relatorio_Processamento.xlsx`) para download no próprio portal.
 
 ### 1.1. Regra de Ouro (Definition of Done)
 > **Nenhuma etapa é considerada concluída com base apenas em declaração da IA ou execução teórica.**  
 > Cada avanço exige comprovação prática:
 > 1. Logs de execução claros e rastreáveis.
-> 2. Validação visual ou em arquivo (Excel/Browser/UiPath/Banco SQLite).
-> 3. Aprovação explícita antes de avançar para a próxima etapa.
+> 2. Validação visual ou em arquivo (Excel/Browser/UiPath/Banco SQLite/Orchestrator).
+> 3. Aprovação explícita em Gate-Check antes de avançar para a próxima etapa.
+
+### 1.2. Critérios de Aceitação Obrigatórios (Os 5 Pilares)
+1. **Concorrência:** O backend deve implementar lock de execução ativo. Se um processamento já estiver em andamento ou na fila, qualquer nova solicitação é bloqueada (`HTTP 409 Conflict`).
+2. **Integridade Transacional (ACID):** Persistência no SQLite gerenciada por transações estritas com *rollback* em caso de falha, impedindo pedidos parcialmente cadastrados.
+3. **Validação de Entrada:** Arquivos fora do padrão `.xlsx`, corrompidos ou com colunas divergentes são rejeitados imediatamente no upload com log do motivo.
+4. **Rastreabilidade Completa:** Cada ciclo possui um `ID_Execucao` único, e cada pedido recebe protocolo imutável gerado pelo backend (`PRT-2026-XXXXXX`), com data/hora e status.
+5. **Evidências Comprováveis:** Logs detalhados, screenshots de falhas sistêmicas (`Data/Temp/`), histórico de Jobs no Orchestrator e relatório final consolidado (`Data/Output/Relatorio_Processamento.xlsx`).
 
 ---
 
-## 2. Arquitetura da Solução e Fluxo Sob Demanda
+## 2. Nova Arquitetura da Solução e Fluxo Orchestrator
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
@@ -37,67 +44,57 @@ O objetivo deste projeto é construir uma automação RPA profissional, robusta 
 └────────────┬─────────────────────────────┬─────────────────────────────────────▲───────┘
              │ Envia .xlsx                 │ Dispara Execução                     │ Download
              ▼                             ▼                                     │
-┌─────────────────────────┐   ┌─────────────────────────┐               ┌────────┴───────┐
-│       API PYTHON        │   │       ROBÔ UIPATH       │               │ RELATÓRIO EXCEL│
-│ • Salva em Data/Input/  │   │ • Lê e audita linhas    │               │ (Data/Output/) │
-│ • Controla Concorrência │   │ • Preenche o formulário │ ────────────> │                │
-│ • Gerencia Estados      │   │ • Captura protocolos    │               └────────────────┘
-└────────────┬────────────┘   └────────────┬────────────┘
-             │                             │
-             │ INSERT / Validação          │ POST /api/pedidos
-             ▼                             ▼
-┌───────────────────────────────────────────────────────┐
-│               BANCO DE DADOS SQLITE                   │
-│                    (nexus_erp.db)                     │
-└───────────────────────────────────────────────────────┘
+┌─────────────────────────┐   ┌─────────────────────────┐                        │
+│       API PYTHON        │   │   UiPath Orchestrator   │                        │
+│ • Salva em Data/Input/  │──>│ • Autentica via OAuth   │                        │
+│ • Cria ID_Execucao      │   │ • API Trigger (StartJob)│                        │
+│ • Monitora Job (Poll)   │   │ • Gerencia fila/robôs   │                        │
+└────────────┬────────────┘   └────────────┬────────────┘                        │
+             │                             │ Dispara Job                         │
+             │ POST /api/pedidos           ▼                                     │
+             │ (Valida & Salva)     ┌─────────────────────────┐                  │
+             │                      │       UiPath ROBOT      │                  │
+             │                      │ • Lê planilha local     │                  │
+             │                      │ • Aplica regras negócio │ ─────────────────┤
+             │                      │ • Preenche Nexus ERP    │                  │
+             ▼                      │ • Gera Relatório Excel  │ ─────────────────┘
+┌─────────────────────────┐         └─────────────────────────┘
+│  BANCO SQLITE (ERP)     │
+│  (nexus_erp.db)         │
+└─────────────────────────┘
 ```
 
-### 2.1. O Ciclo de Vida em 5 Passos (Fluxo Definitivo)
+### 2.1. O Ciclo de Vida em 6 Passos
+1. **Upload da Planilha:** O usuário envia `Pedidos_Input.xlsx` pelo Nexus ERP. O backend gera um `ID_Execucao` único (ex: `EXEC-2026-001`) e armazena o arquivo em `Data/Input/`.
+2. **Habilitação de Disparo:** O portal atualiza o status para `Pronto para processar` e libera o botão de processamento.
+3. **Disparo via API Trigger:** Ao clicar em "Processar Pedidos", o Python obtém token OAuth 2.0 da UiPath e chama o endpoint de Start Job no Orchestrator, passando o `ID_Execucao` e caminho do arquivo como argumentos.
+4. **Execução pelo Robot:** O Orchestrator despacha o Job para o UiPath Robot na máquina Windows. O robô lê a planilha, valida regras, preenche o portal web e captura os protocolos.
+5. **Monitoramento de Estado:** A API Python acompanha o estado do Job no Orchestrator e atualiza o portal em tempo real (*Aguardando* ➔ *Na fila* ➔ *Processando* ➔ *Concluído*).
+6. **Relatório e Download:** Ao finalizar com sucesso, o robô salva `Data/Output/Relatorio_Processamento.xlsx` e o portal libera o botão para download.
 
-1. **Upload da Planilha:** O usuário acessa o Nexus ERP, seleciona `Pedidos_Input.xlsx` e faz o envio. O backend confirma o recebimento e armazena o arquivo em `Data/Input/Pedidos_Input.xlsx`.
-2. **Confirmação e Habilitação:** O portal atualiza o status para `Pronto para Processar` e habilita a ação de início.
-3. **Disparo Sob Demanda:** O usuário clica em **"Processar Pedidos"**. A API registra o início e aciona o robô UiPath.
-4. **Execução Autônoma do UiPath:** O robô trabalha sozinho (sem intervenção humana):
-   - Lê a planilha;
-   - Aplica as regras de negócio em memória;
-   - Preenche o formulário do ERP para os pedidos válidos;
-   - Recebe o protocolo gerado pelo backend;
-   - Consolida os resultados e salva `Data/Output/Relatorio_Processamento.xlsx`.
-5. **Relatório Disponível:** O UiPath sinaliza a conclusão. O portal muda o estado para `Concluído` e libera o botão para download do relatório de auditoria final.
-
-### 2.2. Diretrizes Críticas de Arquitetura
-
-1. **O Botão Solicita o Processamento (Não Gera o Relatório Diretamente):**  
-   O botão do portal apenas inicia a orquestração do robô UiPath. O relatório só passa a existir quando o robô concluir toda a fila de pedidos.
-2. **Controle Estrito de Concorrência (Lock de Execução):**  
-   O backend não permite disparar dois processamentos simultâneos. Se o robô já estiver executando, novas tentativas de disparo são bloqueadas.
-3. **Máquina de Estados Visível no Portal:**  
-   O usuário acompanha claramente as 4 etapas no painel:
-   - `Aguardando Planilha` ➔ `Pronto para Processar` ➔ `Processando...` (com bloqueio de tela/botão) ➔ `Concluído` (ou `Falhou`).
-4. **Liberação Condicional de Download:**  
-   O link/botão para download do relatório só fica visível e ativo após a transição para o estado `Concluído`.
-5. **Origem do Protocolo no Backend:**  
-   O protocolo (`PRT-2026-XXXXXX`) é gerado pela API Python no momento do `INSERT` no SQLite, nunca pelo JavaScript.
-6. **Dupla Validação (Defesa em Profundidade):**  
-   A API Python rejeita qualquer requisição com campos nulos, valores $\le 0$ ou duplicidade de `ID_Pedido`.
-7. **Tratamento de Exceções no Frontend:**  
-   Falhas de rede, erros HTTP (`400`, `409`, `500`) ou travamentos são tratados com alertas visuais explícitos de erro.
+### 2.2. Requisitos Técnicos Específicos
+* **A. Identificação da Execução:** Cada lote recebe um `ID_Execucao` único para segregar arquivos, logs e relatórios.
+* **B. Comunicação de Estados no Portal:**
+  `Aguardando planilha` ➔ `Pronto para processar` ➔ `Enviando solicitação ao Orchestrator` ➔ `Na fila` ➔ `Processando` ➔ `Concluído` (ou `Falhou`).
+* **C. Localização e Argumentos:** O Robot acessa o arquivo no caminho local da máquina. O Python passa os argumentos `in_ExecutionId` e `in_FilePath` ao iniciar o Job no Orchestrator.
+* **D. Segurança:** `Client ID`, `Client Secret`, `User Key` e tokens OAuth são mantidos exclusivamente no backend Python (`.env` protegido), nunca expostos no front-end.
 
 ---
 
-### 2.3. Matriz de Responsabilidades
+## 3. Matriz de Responsabilidades
 
 | Componente | Tecnologia | Responsabilidade Principal |
 | :--- | :--- | :--- |
-| **Interface ERP** | `HTML / CSS / JS` | Upload de arquivos, exibição dos estados (`Aguardando`, `Processando`, `Concluído`), disparo do fluxo e formulário de cadastro. |
-| **API Local** | `Python (REST)` | Receber upload do Excel, gerenciar o estado da execução (evitar concorrência), disparar o robô, validar regras e persistir dados. |
-| **Banco de Dados** | `SQLite (nexus_erp.db)`| Armazenamento estruturado e persistente de todos os pedidos e protocolos gerados. |
-| **Robô RPA** | `UiPath Studio` | Leitura da planilha, auditoria em memória, preenchimento automatizado na interface web e gravação do relatório final. |
-| **Arquivos Excel** | `.xlsx` | Entrada (`Data/Input/`) com os dados brutos e Saída (`Data/Output/`) com auditoria consolidada para download. |
+| **Nexus ERP** | `HTML / CSS / JS` | Upload de planilha, solicitação de processamento, exibição dos estados e download do relatório. |
+| **Python REST API** | `Python (Flask/FastAPI)` | Gerenciamento de arquivos e IDs de execução, autenticação OAuth, chamada de API Trigger no Orchestrator e controle de concorrência. |
+| **UiPath Orchestrator**| `Cloud Orchestrator` | Autenticação central, agendamento/disparo de Jobs, governança e monitoramento do status da execução. |
+| **UiPath Robot** | `UiPath Studio / Robot`| Execução do workflow na máquina Windows, validação de regras de negócio, automação da interface web e geração do relatório final. |
+| **Banco SQLite** | `SQLite (nexus_erp.db)`| Persistência estruturada dos pedidos validados, protocolos oficiais emitidos e histórico. |
+| **Arquivos Excel** | `.xlsx` | Planilha de entrada (`Data/Input/`) e Relatório Consolidado de Auditoria (`Data/Output/`). |
 
 ---
 
-## 3. Regras de Negócio e Dicionário de Dados
+## 4. Regras de Negócio e Dicionário de Dados
 
 | Campo | Tipo | Obrigatoriedade | Regra de Negócio | Ação do Robô em caso de Falha |
 | :--- | :--- | :--- | :--- | :--- |
@@ -110,56 +107,29 @@ O objetivo deste projeto é construir uma automação RPA profissional, robusta 
 
 ---
 
-## 4. Plano Passo a Passo (7 Etapas em 3 Dias)
+## 5. Plano de 7 Etapas Reorganizado
 
-### Dia 1 — Fundação, Ambiente, Backend e Dados
-* **Etapa 1 — Definir e Construir o Backend / Portal Alvo:**
-  - **1.1 (API + SQLite):** Criação da API Python com endpoints de cadastro, persistência SQLite e controle de estado (`/api/pedidos`, `/api/upload`, `/api/processar`, `/api/status`, `/api/relatorio`).
-  - **1.2 (Interface Completa):** Atualização do Nexus ERP com área de Upload, Máquina de Estados (Aguardando / Processando / Concluído), botão "Processar Pedidos" e formulário conectado.
-  - **1.3 (Testes de Integração):** Validação de persistência, bloqueio de concorrência e respostas HTTP.
-  - *Entrega:* Portal web e API funcionando com persistência real em SQLite e controle de ciclo de vida.
-* **Etapa 2 — Preparar o ambiente UiPath:**
-  - Verificação/instalação do UiPath Studio.
-  - Criação do projeto UiPath e estrutura de pastas padronizada.
-  - *Entrega:* Projeto UiPath configurado e validado.
-* **Etapa 3 — Criar os dados de entrada:**
-  - Criação de `Data/Input/Pedidos_Input.xlsx` contendo casos de sucesso e casos de borda/erro.
-  - *Entrega:* Planilha criada e validada.
-
-### Dia 2 — Lógica de Negócio e Automação Web
-* **Etapa 4 — Desenvolver leitura e validação:**
-  - Leitura da planilha em `DataTable`.
-  - Classificação em Válidos, Inválidos e Cancelados (apenas em memória e logs, sem submissão).
-  - *Entrega:* Output do UiPath comprovando a correta segregação.
-* **Etapa 5 — Automatizar o cadastro web:**
-  - Abertura de navegador e navegação até `http://localhost:8080`.
-  - Preenchimento dos campos mapeados e envio.
-  - Captura do protocolo retornado pela API via interface (`PRT-2026-XXXX`).
-  - *Entrega:* Pedidos válidos inseridos e gravados no banco SQLite.
-
-### Dia 3 — Relatórios, Resiliência e Portfólio
-* **Etapa 6 — Criar relatório e tratar erros:**
-  - Estruturação do bloco `Try Catch` com captura de `BusinessRuleException` e `SystemException`.
-  - Geração de `Relatorio_Processamento.xlsx` com timestamps e protocolos.
-  - Captura de screenshot em falhas técnicas em `Data/Temp/`.
-  - *Entrega:* Relatório final preenchido, disponível para download no portal e logs de auditoria.
-* **Etapa 7 — Testar e publicar:**
-  - Testes de estresse com massa de dados anômala.
-  - Confecção do `README.md` detalhado e estruturado para entrevistas.
-  - Publicação do repositório no GitHub com evidências.
-  - *Entrega:* Portfólio concluído e publicado.
+| Etapa | Foco Principal | Entregável e Gate-Check |
+| :--- | :--- | :--- |
+| **1. Ambiente UiPath** | Configuração do Automation Cloud, licenças Community, Studio, Robot local conectado e permissão de External Application (OAuth). | **Gate-Check 1:** Publicar um processo simples "Hello World" e dispará-lo com sucesso pelo Orchestrator na máquina local. |
+| **2. Backend + SQLite** | Criação da API REST em Python, estrutura do banco `nexus_erp.db`, endpoints de upload com geração de `ID_Execucao` e controle de lock. | **Gate-Check 2:** Upload de planilha via API testado, arquivo salvo em `Data/Input/` e banco inicializado. |
+| **3. Integração Orchestrator** | Implementação do cliente OAuth no Python, chamada da API de Start Job e polling de status do Job no Orchestrator. | **Gate-Check 3:** Script Python dispara com sucesso um Job no Orchestrator via API e captura seu status até a conclusão. |
+| **4. Portal Nexus ERP** | Interface web com área de upload, indicador dos 6 estados do ciclo de vida, botão de disparo e link condicional de download. | **Gate-Check 4:** Interface integrada à API funcionando no navegador e refletindo os estados em tempo real. |
+| **5. Dados e Validação** | Criação da planilha de testes `Pedidos_Input.xlsx` e workflow UiPath para leitura e validação estrita das regras de negócio em memória. | **Gate-Check 5:** Execução local do workflow classificando registros válidos, inválidos e cancelados nos logs de saída. |
+| **6. Automação Web e Relatório**| Workflow UiPath preenchendo o Nexus ERP para os pedidos válidos, capturando protocolos gerados e gravando `Relatorio_Processamento.xlsx`. | **Gate-Check 6:** Execução completa gerando o arquivo final com comprovantes e pedidos salvos no SQLite. |
+| **7. Testes e Portfólio** | Testes de concorrência, simulação de falhas, tratamento de erros no UiPath, confecção do `README.md` arquitetural e publicação no GitHub. | **Gate-Check 7:** Repositório público no GitHub com documentação, diagramas e evidências gravadas. |
 
 ---
 
-## 5. Mapeamento Técnico dos Elementos Web (Nexus ERP)
+## 6. Mapeamento Técnico dos Elementos Web (Nexus ERP)
 
 | Seção | Elemento | Seletor / ID HTML | Tipo | Finalidade |
 | :--- | :--- | :--- | :--- | :--- |
 | **Painel de Controle** | Input Arquivo Excel | `#input-upload-excel` | Input File | Selecionar `Pedidos_Input.xlsx` |
-| **Painel de Controle** | Botão Upload | `#btn-upload` | Button | Enviar planilha para o backend |
-| **Painel de Controle** | Indicador de Estado | `#badge-status-automacao` | Badge | Exibir `Aguardando`, `Processando` ou `Concluído` |
-| **Painel de Controle** | Botão Processar | `#btn-processar-pedidos` | Button | Solicitar início da execução do UiPath |
-| **Painel de Controle** | Botão Baixar Relatório | `#btn-download-relatorio` | Link/Button | Baixar `Relatorio_Processamento.xlsx` gerado |
+| **Painel de Controle** | Botão Upload | `#btn-upload` | Button | Enviar planilha para a API Python |
+| **Painel de Controle** | Indicador de Estado | `#badge-status-automacao` | Badge | Exibir os 6 estados do ciclo de vida |
+| **Painel de Controle** | Botão Processar | `#btn-processar-pedidos` | Button | Solicitar disparo do Job ao Orchestrator |
+| **Painel de Controle** | Botão Baixar Relatório | `#btn-download-relatorio` | Link/Button | Baixar `Relatorio_Processamento.xlsx` |
 | **Cadastro de Pedido** | Campo ID do Pedido | `#input-pedido-id` | Input Text | Inserir ID único |
 | **Cadastro de Pedido** | Campo Cliente | `#input-cliente-nome` | Input Text | Inserir nome do cliente |
 | **Cadastro de Pedido** | Campo Produto | `#input-produto` | Input Text | Inserir descrição do item |
