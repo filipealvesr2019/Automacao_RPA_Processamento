@@ -218,7 +218,9 @@ async function handleUploadExcel() {
 
 async function handleProcessarPedidos() {
   btnProcessarPedidos.disabled = true;
-  btnProcessarPedidos.textContent = 'Iniciando Robô...';
+  btnProcessarPedidos.textContent = '⏳ Robô Executando...';
+  processarFeedback.textContent = 'Robô em execução: validando regras de negócio e persistindo pedidos...';
+  atualizarBadgeStatus('PROCESSANDO', 'Processando pedidos...');
 
   try {
     const res = await fetch('/api/processar', { method: 'POST' });
@@ -226,12 +228,26 @@ async function handleProcessarPedidos() {
 
     if (!res.ok) {
       alert(data.erro || 'Não foi possível iniciar o processamento.');
+      consultarStatusAutomacao();
       return;
     }
 
-    consultarStatusAutomacao();
+    // Polling imediato acelerado durante o processamento
+    const intervalId = setInterval(async () => {
+      const statusRes = await fetch('/api/status');
+      if (statusRes.ok) {
+        const info = await statusRes.json();
+        consultarStatusAutomacao();
+        if (info.estado === 'CONCLUIDO' || info.estado === 'FALHOU') {
+          clearInterval(intervalId);
+          carregarPedidos();
+        }
+      }
+    }, 1000);
+
   } catch (err) {
     alert('Erro de conexão ao solicitar início da automação.');
+    consultarStatusAutomacao();
   }
 }
 
@@ -244,14 +260,17 @@ async function consultarStatusAutomacao() {
     atualizarBadgeStatus(info.estado, info.mensagem);
 
     if (info.estado === 'AGUARDANDO_PLANILHA') {
-      btnProcessarPedidos.disabled = true;
-      processarFeedback.textContent = 'Envie a planilha para habilitar o processamento.';
+      btnProcessarPedidos.disabled = false;
+      btnProcessarPedidos.textContent = '⚙️ Processar Pedidos';
+      processarFeedback.textContent = 'Dica: Selecione a planilha ao lado ou clique para usar o arquivo padrão.';
       btnDownloadRelatorio.classList.add('hidden');
       relatorioFeedback.textContent = 'Disponível após conclusão do robô.';
     } else if (info.estado === 'PRONTO_PARA_PROCESSAR') {
       btnProcessarPedidos.disabled = false;
       btnProcessarPedidos.textContent = '⚙️ Processar Pedidos';
-      processarFeedback.textContent = 'Planilha carregada. Clique para iniciar o robô UiPath.';
+      processarFeedback.textContent = 'Planilha carregada. Clique para iniciar o processamento!';
+      uploadFeedback.textContent = `✓ Planilha pronta: ${info.arquivo_atual || 'Pedidos_Input.xlsx'}`;
+      uploadFeedback.style.color = '#059669';
       btnDownloadRelatorio.classList.add('hidden');
     } else if (info.estado === 'PROCESSANDO') {
       btnProcessarPedidos.disabled = true;
@@ -259,11 +278,11 @@ async function consultarStatusAutomacao() {
       processarFeedback.textContent = 'Aguarde: o robô está validando e cadastrando pedidos.';
       btnDownloadRelatorio.classList.add('hidden');
       relatorioFeedback.textContent = 'Gerando relatório...';
-      carregarPedidos(); // Atualiza a tabela enquanto cadastra
+      carregarPedidos();
     } else if (info.estado === 'CONCLUIDO') {
       btnProcessarPedidos.disabled = false;
       btnProcessarPedidos.textContent = '⚙️ Processar Novamente';
-      processarFeedback.textContent = 'Última execução finalizada com sucesso.';
+      processarFeedback.textContent = 'Última execução finalizada com sucesso!';
       btnDownloadRelatorio.classList.remove('hidden');
       relatorioFeedback.textContent = '✓ Relatório pronto para download.';
       carregarPedidos();

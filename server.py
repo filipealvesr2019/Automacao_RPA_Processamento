@@ -7,6 +7,7 @@ Porta: 8080
 import os
 import sys
 import json
+import time
 import sqlite3
 import random
 import datetime
@@ -141,6 +142,14 @@ class NexusERPRequestHandler(SimpleHTTPRequestHandler):
     def _handle_get_status(self):
         relatorio_path = os.path.join(OUTPUT_DIR, "Relatorio_Processamento.xlsx")
         estado_automacao["relatorio_disponivel"] = os.path.exists(relatorio_path)
+
+        # Se a planilha já existe na pasta de entrada, avança automaticamente o estado para pronto
+        caminho_input = os.path.join(INPUT_DIR, "Pedidos_Input.xlsx")
+        if os.path.exists(caminho_input) and estado_automacao["estado"] == "AGUARDANDO_PLANILHA":
+            estado_automacao["estado"] = "PRONTO_PARA_PROCESSAR"
+            estado_automacao["arquivo_atual"] = "Pedidos_Input.xlsx"
+            estado_automacao["mensagem"] = "Planilha padrão detectada em Data/Input/Pedidos_Input.xlsx. Pronto para processar."
+
         self._set_headers(200)
         self.wfile.write(json.dumps(estado_automacao, ensure_ascii=False).encode("utf-8"))
 
@@ -352,15 +361,13 @@ class NexusERPRequestHandler(SimpleHTTPRequestHandler):
     def _executar_robo_background(self):
         try:
             print("[ROBÔ] Disparo de execução autônoma iniciado...")
-            # Verifica se existe um script de automação ou fluxo do UiPath
-            # Por enquanto, se executado via Python/Worker, chama o processador oficial
+            time.sleep(1.5)
+            # Chama o motor oficial de processamento de pedidos
             processador_script = os.path.join(BASE_DIR, "processar_pedidos.py")
             if os.path.exists(processador_script):
                 subprocess.run([sys.executable, processador_script], check=True)
-            else:
-                # Simulação ou aguardo do UiPath
-                pass
 
+            time.sleep(1.0)
             estado_automacao["estado"] = "CONCLUIDO"
             estado_automacao["mensagem"] = "Processamento concluído com sucesso! Relatório disponível para download."
             estado_automacao["data_fim"] = datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")
