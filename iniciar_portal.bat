@@ -12,5 +12,5 @@ echo Pressione Ctrl + C nesta janela para encerrar o servidor.
 echo ------------------------------------------------------
 
 start http://localhost:8080
-python -m http.server 8080 --directory PortalWeb
+python server.py
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portal Corporativo de Gestão de Pedidos | ERP Demo</title>
+  <title>Portal Corporativo de Gestão de Pedidos | Nexus ERP</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,12 +21,65 @@
       </div>
       <div class="badge-env">
         <span class="status-dot"></span>
-        <span>Ambiente Local • RPA Target</span>
+        <span>Ambiente Local • RPA Target (SQLite + API)</span>
       </div>
     </div>
   </header>
 
   <main class="main-container">
+    <!-- Painel de Controle e Orquestração RPA -->
+    <section class="card control-panel-card">
+      <div class="panel-header">
+        <div>
+          <h3>Painel de Controle da Automação RPA</h3>
+          <p>Importe a planilha de pedidos, inicie o robô sob demanda e acompanhe o processamento.</p>
+        </div>
+        <div class="status-box">
+          <span class="status-label">Status da Automação:</span>
+          <span id="badge-status-automacao" class="badge-status badge-waiting">Aguardando Planilha</span>
+        </div>
+      </div>
+
+      <div class="control-grid">
+        <!-- 1. Upload da Planilha -->
+        <div class="control-step">
+          <span class="step-num">1</span>
+          <div class="step-content">
+            <label for="input-upload-excel" class="step-title">Selecionar Planilha Excel (.xlsx)</label>
+            <div class="upload-wrapper">
+              <input type="file" id="input-upload-excel" accept=".xlsx,.xls" class="file-input">
+              <button type="button" id="btn-upload" class="btn btn-secondary">Enviar Planilha</button>
+            </div>
+            <span id="upload-feedback" class="step-subtext">Nenhum arquivo enviado.</span>
+          </div>
+        </div>
+
+        <!-- 2. Disparo Sob Demanda -->
+        <div class="control-step">
+          <span class="step-num">2</span>
+          <div class="step-content">
+            <span class="step-title">Executar Processamento</span>
+            <button type="button" id="btn-processar-pedidos" class="btn btn-primary btn-process" disabled>
+              ⚙️ Processar Pedidos
+            </button>
+            <span id="processar-feedback" class="step-subtext">Aguardando envio do arquivo para habilitar.</span>
+          </div>
+        </div>
+
+        <!-- 3. Download do Relatório -->
+        <div class="control-step">
+          <span class="step-num">3</span>
+          <div class="step-content">
+            <span class="step-title">Relatório de Auditoria</span>
+            <a href="/api/relatorio/download" id="btn-download-relatorio" class="btn btn-success-outline hidden" download>
+              📊 Baixar Relatório Final (.xlsx)
+            </a>
+            <span id="relatorio-feedback" class="step-subtext">Disponível após conclusão do robô.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Feedback / Alerta de Status para Captura do Robô -->
     <section id="feedback-section" class="feedback-card hidden" aria-live="polite">
       <div class="feedback-icon" id="feedback-icon">✓</div>
@@ -35,14 +88,14 @@
         <p id="feedback-message">Mensagem de retorno do sistema.</p>
         <div id="protocolo-wrapper" class="protocolo-box hidden">
           <span class="protocolo-label">Número de Protocolo:</span>
-          <span id="numero-protocolo" class="protocolo-code">PRT-0000-0000</span>
+          <span id="numero-protocolo" class="protocolo-code">PRT-0000-000000</span>
         </div>
       </div>
       <button type="button" class="btn-close-feedback" id="btn-close-feedback" title="Fechar">×</button>
     </section>
 
     <div class="grid-layout">
-      <!-- Formulário de Cadastro -->
+      <!-- Formulário de Cadastro Manual (Alvo do Robô UiPath) -->
       <section class="card form-card">
         <div class="card-header">
           <h2>Novo Cadastro de Pedido</h2>
@@ -85,16 +138,16 @@
         </form>
       </section>
 
-      <!-- Painel de Consulta e Estatísticas -->
+      <!-- Painel de Consulta e Estatísticas (Direto do SQLite) -->
       <section class="card table-card">
         <div class="card-header flex-between">
           <div>
             <h2>Consulta de Pedidos Registrados</h2>
-            <p>Auditoria em tempo real dos pedidos recebidos no sistema.</p>
+            <p>Auditoria em tempo real dos pedidos persistidos no banco SQLite.</p>
           </div>
           <div class="header-actions">
             <span class="counter-badge" id="total-registros">0 pedidos</span>
-            <button type="button" id="btn-resetar-banco" class="btn btn-danger-outline" title="Limpar todos os dados salvos para reiniciar testes">Resetar Base</button>
+            <button type="button" id="btn-resetar-banco" class="btn btn-danger-outline" title="Limpar todos os dados do SQLite">Resetar Base</button>
           </div>
         </div>
 
@@ -113,7 +166,6 @@
               </tr>
             </thead>
             <tbody id="tabela-corpo">
-              <!-- Linhas inseridas via JS -->
               <tr id="linha-vazia">
                 <td colspan="8" class="text-center empty-state">Nenhum pedido registrado até o momento.</td>
               </tr>
@@ -125,10 +177,9 @@
   </main>
 
   <footer class="footer">
-    <p>Nexus ERP v2.4 • Módulo de Homologação para Automação Robótica de Processos (RPA)</p>
+    <p>Nexus ERP v2.4 • Módulo de Homologação para Automação Robótica de Processos (RPA) • SQLite + API Backend</p>
   </footer>
 
   <script src="app.js"></script>
 </body>
 </html>
-
