@@ -302,27 +302,27 @@
                                       <ui:LogMessage DisplayName="Log Processando" sap:VirtualizedContainerService.HintSize="356,92" sap2010:WorkflowViewState.IdRef="LogMessage_7" Level="Info" Message="[&quot;[WEB] Preenchendo formulário no Nexus ERP para o pedido: &quot; + strPedidoId]" />
                                       <ui:TypeInto AlterIfDisabled="{x:Null}" ClickBeforeTyping="{x:Null}" DelayBefore="{x:Null}" DelayBetweenKeys="{x:Null}" DelayMS="{x:Null}" Activate="True" DisplayName="Type Into - ID Pedido" EmptyField="True" sap:VirtualizedContainerService.HintSize="356,115" sap2010:WorkflowViewState.IdRef="TypeInto_1" SendWindowMessages="False" SimulateType="True" Text="[strPedidoId]">
                                         <ui:TypeInto.Target>
-                                          <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Id="00000000-0000-0000-0000-000000000000" Selector="&lt;html app='*' title='*Nexus ERP*' /&gt;&lt;webctrl id='input-pedido-id' tag='INPUT' /&gt;" TimeoutMS="3000" WaitForReady="COMPLETE" />
+                                          <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Id="00000000-0000-0000-0000-000000000000" Selector="&lt;webctrl id='input-pedido-id' tag='INPUT' /&gt;" TimeoutMS="7000" WaitForReady="COMPLETE" />
                                         </ui:TypeInto.Target>
                                       </ui:TypeInto>
                                       <ui:TypeInto AlterIfDisabled="{x:Null}" ClickBeforeTyping="{x:Null}" DelayBefore="{x:Null}" DelayBetweenKeys="{x:Null}" DelayMS="{x:Null}" Activate="True" DisplayName="Type Into - Cliente" EmptyField="True" sap:VirtualizedContainerService.HintSize="356,115" sap2010:WorkflowViewState.IdRef="TypeInto_2" SendWindowMessages="False" SimulateType="True" Text="[strCliente]">
                                         <ui:TypeInto.Target>
-                                          <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Id="00000000-0000-0000-0000-000000000000" Selector="&lt;html app='*' title='*Nexus ERP*' /&gt;&lt;webctrl id='input-cliente-nome' tag='INPUT' /&gt;" TimeoutMS="3000" WaitForReady="COMPLETE" />
+                                          <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Id="00000000-0000-0000-0000-000000000000" Selector="&lt;webctrl id='input-cliente-nome' tag='INPUT' /&gt;" TimeoutMS="7000" WaitForReady="COMPLETE" />
                                         </ui:TypeInto.Target>
                                       </ui:TypeInto>
                                       <ui:TypeInto AlterIfDisabled="{x:Null}" ClickBeforeTyping="{x:Null}" DelayBefore="{x:Null}" DelayBetweenKeys="{x:Null}" DelayMS="{x:Null}" Activate="True" DisplayName="Type Into - Produto" EmptyField="True" sap:VirtualizedContainerService.HintSize="356,115" sap2010:WorkflowViewState.IdRef="TypeInto_3" SendWindowMessages="False" SimulateType="True" Text="[strProduto]">
                                         <ui:TypeInto.Target>
-                                          <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Id="00000000-0000-0000-0000-000000000000" Selector="&lt;html app='*' title='*Nexus ERP*' /&gt;&lt;webctrl id='input-produto' tag='INPUT' /&gt;" TimeoutMS="3000" WaitForReady="COMPLETE" />
+                                          <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Id="00000000-0000-0000-0000-000000000000" Selector="&lt;webctrl id='input-produto' tag='INPUT' /&gt;" TimeoutMS="7000" WaitForReady="COMPLETE" />
                                         </ui:TypeInto.Target>
                                       </ui:TypeInto>
                                       <ui:TypeInto AlterIfDisabled="{x:Null}" ClickBeforeTyping="{x:Null}" DelayBefore="{x:Null}" DelayBetweenKeys="{x:Null}" DelayMS="{x:Null}" Activate="True" DisplayName="Type Into - Quantidade" EmptyField="True" sap:VirtualizedContainerService.HintSize="356,115" sap2010:WorkflowViewState.IdRef="TypeInto_4" SendWindowMessages="False" SimulateType="True" Text="[strQuantidade]">
                                         <ui:TypeInto.Target>
-                                          <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Id="00000000-0000-0000-0000-000000000000" Selector="&lt;html app='*' title='*Nexus ERP*' /&gt;&lt;webctrl id='input-quantidade' tag='INPUT' /&gt;" TimeoutMS="3000" WaitForReady="COMPLETE" />
+                                          <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Id="00000000-0000-0000-0000-000000000000" Selector="&lt;webctrl id='input-quantidade' tag='INPUT' /&gt;" TimeoutMS="7000" WaitForReady="COMPLETE" />
                                         </ui:TypeInto.Target>
                                       </ui:TypeInto>
                                       <ui:TypeInto AlterIfDisabled="{x:Null}" ClickBeforeTyping="{x:Null}" DelayBefore="{x:Null}" DelayBetweenKeys="{x:Null}" DelayMS="{x:Null}" Activate="True" DisplayName="Type Into - Valor Unitario" EmptyField="True" sap:VirtualizedContainerService.HintSize="356,115" sap2010:WorkflowViewState.IdRef="TypeInto_5" SendWindowMessages="False" SimulateType="True" Text="[strValorUnitario]">
                                         <ui:TypeInto.Target>
-                                          <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Id="00000000-0000-0000-0000-000000000000" Selector="&lt;html app='*' title='*Nexus ERP*' /&gt;&lt;webctrl id='input-valor-unitario' tag='INPUT' /&gt;" TimeoutMS="3000" WaitForReady="COMPLETE" />
+                                          <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Id="00000000-0000-0000-0000-000000000000" Selector="&lt;webctrl id='input-valor-unitario' tag='INPUT' /&gt;" TimeoutMS="7000" WaitForReady="COMPLETE" />
                                         </ui:TypeInto.Target>
                                       </ui:TypeInto>
                                       <ui:Click AlterIfDisabled="{x:Null}" DelayBefore="{x:Null}" DelayMS="{x:Null}" SendWindowMessages="{x:Null}" ClickType="CLICK_SINGLE" DisplayName="Click - Cadastrar Pedido" sap:VirtualizedContainerService.HintSize="356,106" sap2010:WorkflowViewState.IdRef="Click_1" KeyModifiers="None" MouseButton="BTN_LEFT" SimulateClick="True">
@@ -337,13 +337,13 @@
                                           </ui:CursorPosition>
                                         </ui:Click.CursorPosition>
                                         <ui:Click.Target>
-                                          <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Id="00000000-0000-0000-0000-000000000000" Selector="&lt;html app='*' title='*Nexus ERP*' /&gt;&lt;webctrl id='btn-cadastrar' tag='BUTTON' /&gt;" TimeoutMS="3000" WaitForReady="COMPLETE" />
+                                          <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Id="00000000-0000-0000-0000-000000000000" Selector="&lt;webctrl id='btn-cadastrar' tag='BUTTON' /&gt;" TimeoutMS="7000" WaitForReady="COMPLETE" />
                                         </ui:Click.Target>
                                       </ui:Click>
                                       <Delay DisplayName="Delay 1s para geração do protocolo" Duration="00:00:01" sap:VirtualizedContainerService.HintSize="356,25" sap2010:WorkflowViewState.IdRef="Delay_2" />
                                       <ui:GetValue ContinueOnError="True" DisplayName="Get Text - Protocolo Oficial" sap:VirtualizedContainerService.HintSize="356,106" sap2010:WorkflowViewState.IdRef="GetValue_1">
                                         <ui:GetValue.Target>
-                                          <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Id="00000000-0000-0000-0000-000000000000" Selector="&lt;html app='*' title='*Nexus ERP*' /&gt;&lt;webctrl id='numero-protocolo' tag='SPAN' /&gt;" TimeoutMS="3000" WaitForReady="COMPLETE" />
+                                          <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Id="00000000-0000-0000-0000-000000000000" Selector="&lt;webctrl id='numero-protocolo' tag='SPAN' /&gt;" TimeoutMS="7000" WaitForReady="COMPLETE" />
                                         </ui:GetValue.Target>
                                         <ui:GetValue.Value>
                                           <OutArgument x:TypeArguments="x:String">[strProtocolo]</OutArgument>
