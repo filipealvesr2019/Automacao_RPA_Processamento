@@ -27,59 +27,6 @@
   </header>
 
   <main class="main-container">
-    <!-- Painel de Controle e Orquestração RPA -->
-    <section class="card control-panel-card">
-      <div class="panel-header">
-        <div>
-          <h3>Painel de Controle da Automação RPA</h3>
-          <p>Importe a planilha de pedidos, inicie o robô sob demanda e acompanhe o processamento.</p>
-        </div>
-        <div class="status-box">
-          <span class="status-label">Status da Automação:</span>
-          <span id="badge-status-automacao" class="badge-status badge-waiting">Aguardando Planilha</span>
-        </div>
-      </div>
-
-      <div class="control-grid">
-        <!-- 1. Upload da Planilha -->
-        <div class="control-step">
-          <span class="step-num">1</span>
-          <div class="step-content">
-            <label for="input-upload-excel" class="step-title">Selecionar Planilha Excel (.xlsx)</label>
-            <div class="upload-wrapper">
-              <input type="file" id="input-upload-excel" accept=".xlsx,.xls" class="file-input">
-              <button type="button" id="btn-upload" class="btn btn-secondary">Enviar Planilha</button>
-            </div>
-            <span id="upload-feedback" class="step-subtext">Nenhum arquivo enviado.</span>
-          </div>
-        </div>
-
-        <!-- 2. Disparo Sob Demanda -->
-        <div class="control-step">
-          <span class="step-num">2</span>
-          <div class="step-content">
-            <span class="step-title">Executar Processamento</span>
-            <button type="button" id="btn-processar-pedidos" class="btn btn-primary btn-process" disabled>
-              ⚙️ Processar Pedidos
-            </button>
-            <span id="processar-feedback" class="step-subtext">Aguardando envio do arquivo para habilitar.</span>
-          </div>
-        </div>
-
-        <!-- 3. Download do Relatório -->
-        <div class="control-step">
-          <span class="step-num">3</span>
-          <div class="step-content">
-            <span class="step-title">Relatório de Auditoria</span>
-            <a href="/api/relatorio/download" id="btn-download-relatorio" class="btn btn-success-outline hidden" download>
-              📊 Baixar Relatório Final (.xlsx)
-            </a>
-            <span id="relatorio-feedback" class="step-subtext">Disponível após conclusão do robô.</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- Feedback / Alerta de Status para Captura do Robô -->
     <section id="feedback-section" class="feedback-card hidden" aria-live="polite">
       <div class="feedback-icon" id="feedback-icon">✓</div>

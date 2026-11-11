@@ -1,7 +1,7 @@
 // Portal Corporativo de Gestão de Pedidos - Nexus ERP
 // Frontend Conectado à API Python + SQLite
 
-// Elementos do Formulário de Cadastro
+// Elementos do Formulário de Cadastro Manual
 const form = document.getElementById('form-pedido');
 const inputPedidoId = document.getElementById('input-pedido-id');
 const inputClienteNome = document.getElementById('input-cliente-nome');
@@ -12,7 +12,7 @@ const btnLimpar = document.getElementById('btn-limpar');
 const btnCadastrar = document.getElementById('btn-cadastrar');
 const btnResetar = document.getElementById('btn-resetar-banco');
 
-// Elementos de Feedback
+// Elementos de Feedback e Protocolo
 const feedbackSection = document.getElementById('feedback-section');
 const feedbackIcon = document.getElementById('feedback-icon');
 const feedbackTitle = document.getElementById('feedback-title');
@@ -25,24 +25,10 @@ const btnCloseFeedback = document.getElementById('btn-close-feedback');
 const tabelaCorpo = document.getElementById('tabela-corpo');
 const totalRegistros = document.getElementById('total-registros');
 
-// Painel de Controle e Orquestração RPA
-const inputUploadExcel = document.getElementById('input-upload-excel');
-const btnUpload = document.getElementById('btn-upload');
-const uploadFeedback = document.getElementById('upload-feedback');
-const btnProcessarPedidos = document.getElementById('btn-processar-pedidos');
-const processarFeedback = document.getElementById('processar-feedback');
-const badgeStatusAutomacao = document.getElementById('badge-status-automacao');
-const btnDownloadRelatorio = document.getElementById('btn-download-relatorio');
-const relatorioFeedback = document.getElementById('relatorio-feedback');
-
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => {
   carregarPedidos();
-  consultarStatusAutomacao();
   configurarEventos();
-
-  // Polling para monitorar o status do robô caso esteja processando
-  setInterval(consultarStatusAutomacao, 3000);
 });
 
 function configurarEventos() {
@@ -50,9 +36,6 @@ function configurarEventos() {
   btnLimpar.addEventListener('click', limparFormulario);
   btnResetar.addEventListener('click', handleResetarBase);
   btnCloseFeedback.addEventListener('click', ocultarFeedback);
-
-  btnUpload.addEventListener('click', handleUploadExcel);
-  btnProcessarPedidos.addEventListener('click', handleProcessarPedidos);
 }
 
 // ==========================================
@@ -150,12 +133,12 @@ async function handleCadastro(e) {
     const data = await res.json();
 
     if (!res.ok) {
-      // Tratamento estrito de erros do backend (duplicidade, validação ou servidor)
+      // Retorno de erro do backend (ex: ID duplicado ou erro de banco)
       exibirFeedback('error', 'Rejeição no Cadastro', data.erro || 'Falha ao processar pedido na API.');
       return;
     }
 
-    // Sucesso: Protocolo gerado exclusivamente pelo backend (SQLite)
+    // Sucesso: Protocolo oficial gerado exclusivamente pelo backend (SQLite)
     exibirFeedback(
       'success',
       'Pedido Cadastrado com Sucesso!',
@@ -175,147 +158,7 @@ async function handleCadastro(e) {
 }
 
 // ==========================================
-// 3. ORQUESTRAÇÃO RPA: UPLOAD, STATUS E DISPARO
-// ==========================================
-async function handleUploadExcel() {
-  const file = inputUploadExcel.files[0];
-  if (!file) {
-    uploadFeedback.textContent = 'Por favor, selecione um arquivo Excel primeiro.';
-    uploadFeedback.style.color = '#dc2626';
-    return;
-  }
-
-  btnUpload.disabled = true;
-  btnUpload.textContent = 'Enviando...';
-  uploadFeedback.textContent = 'Enviando arquivo ao servidor...';
-  uploadFeedback.style.color = '#64748b';
-
-  try {
-    const res = await fetch('/api/upload', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/octet-stream' },
-      body: file
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.erro || 'Erro ao enviar arquivo.');
-    }
-
-    uploadFeedback.textContent = `✓ Arquivo recebido: ${file.name} (${data.total_registros} registros)`;
-    uploadFeedback.style.color = '#059669';
-
-    consultarStatusAutomacao();
-  } catch (err) {
-    uploadFeedback.textContent = `Erro: ${err.message}`;
-    uploadFeedback.style.color = '#dc2626';
-  } finally {
-    btnUpload.disabled = false;
-    btnUpload.textContent = 'Enviar Planilha';
-  }
-}
-
-async function handleProcessarPedidos() {
-  btnProcessarPedidos.disabled = true;
-  btnProcessarPedidos.textContent = '⏳ Robô Executando...';
-  processarFeedback.textContent = 'Robô em execução: validando regras de negócio e persistindo pedidos...';
-  atualizarBadgeStatus('PROCESSANDO', 'Processando pedidos...');
-
-  try {
-    const res = await fetch('/api/processar', { method: 'POST' });
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert(data.erro || 'Não foi possível iniciar o processamento.');
-      consultarStatusAutomacao();
-      return;
-    }
-
-    // Polling imediato acelerado durante o processamento
-    const intervalId = setInterval(async () => {
-      const statusRes = await fetch('/api/status');
-      if (statusRes.ok) {
-        const info = await statusRes.json();
-        consultarStatusAutomacao();
-        if (info.estado === 'CONCLUIDO' || info.estado === 'FALHOU') {
-          clearInterval(intervalId);
-          carregarPedidos();
-        }
-      }
-    }, 1000);
-
-  } catch (err) {
-    alert('Erro de conexão ao solicitar início da automação.');
-    consultarStatusAutomacao();
-  }
-}
-
-async function consultarStatusAutomacao() {
-  try {
-    const res = await fetch('/api/status');
-    if (!res.ok) return;
-    const info = await res.json();
-
-    atualizarBadgeStatus(info.estado, info.mensagem);
-
-    if (info.estado === 'AGUARDANDO_PLANILHA') {
-      btnProcessarPedidos.disabled = false;
-      btnProcessarPedidos.textContent = '⚙️ Processar Pedidos';
-      processarFeedback.textContent = 'Dica: Selecione a planilha ao lado ou clique para usar o arquivo padrão.';
-      btnDownloadRelatorio.classList.add('hidden');
-      relatorioFeedback.textContent = 'Disponível após conclusão do robô.';
-    } else if (info.estado === 'PRONTO_PARA_PROCESSAR') {
-      btnProcessarPedidos.disabled = false;
-      btnProcessarPedidos.textContent = '⚙️ Processar Pedidos';
-      processarFeedback.textContent = 'Planilha carregada. Clique para iniciar o processamento!';
-      uploadFeedback.textContent = `✓ Planilha pronta: ${info.arquivo_atual || 'Pedidos_Input.xlsx'}`;
-      uploadFeedback.style.color = '#059669';
-      btnDownloadRelatorio.classList.add('hidden');
-    } else if (info.estado === 'PROCESSANDO') {
-      btnProcessarPedidos.disabled = true;
-      btnProcessarPedidos.textContent = '⏳ Robô Executando...';
-      processarFeedback.textContent = 'Aguarde: o robô está validando e cadastrando pedidos.';
-      btnDownloadRelatorio.classList.add('hidden');
-      relatorioFeedback.textContent = 'Gerando relatório...';
-      carregarPedidos();
-    } else if (info.estado === 'CONCLUIDO') {
-      btnProcessarPedidos.disabled = false;
-      btnProcessarPedidos.textContent = '⚙️ Processar Novamente';
-      processarFeedback.textContent = 'Última execução finalizada com sucesso!';
-      btnDownloadRelatorio.classList.remove('hidden');
-      relatorioFeedback.textContent = '✓ Relatório pronto para download.';
-      carregarPedidos();
-    } else if (info.estado === 'FALHOU') {
-      btnProcessarPedidos.disabled = false;
-      btnProcessarPedidos.textContent = '⚙️ Tentar Novamente';
-      processarFeedback.textContent = `Atenção: ${info.mensagem}`;
-      btnDownloadRelatorio.classList.add('hidden');
-    }
-  } catch (err) {
-    console.warn('Erro ao consultar status da automação:', err);
-  }
-}
-
-function atualizarBadgeStatus(estado, mensagem) {
-  badgeStatusAutomacao.className = 'badge-status';
-
-  const map = {
-    'AGUARDANDO_PLANILHA': { label: 'Aguardando Planilha', cls: 'badge-waiting' },
-    'PRONTO_PARA_PROCESSAR': { label: 'Pronto para Processar', cls: 'badge-ready' },
-    'PROCESSANDO': { label: 'Processando...', cls: 'badge-processing' },
-    'CONCLUIDO': { label: 'Concluído', cls: 'badge-completed' },
-    'FALHOU': { label: 'Falhou', cls: 'badge-failed' }
-  };
-
-  const current = map[estado] || { label: estado, cls: 'badge-waiting' };
-  badgeStatusAutomacao.textContent = current.label;
-  badgeStatusAutomacao.classList.add(current.cls);
-  badgeStatusAutomacao.title = mensagem || '';
-}
-
-// ==========================================
-// 4. RESET DA BASE E CONTROLES DE INTERFACE
+// 3. RESET DA BASE E CONTROLES DE INTERFACE
 // ==========================================
 async function handleResetarBase() {
   const confirmou = confirm('Atenção: Isso irá apagar todos os pedidos do banco SQLite e resetar o histórico. Deseja continuar?');
@@ -326,10 +169,6 @@ async function handleResetarBase() {
     const data = await res.json();
     exibirFeedback('success', 'Base Resetada', 'Todos os pedidos do SQLite foram apagados com sucesso.');
     carregarPedidos();
-    consultarStatusAutomacao();
-    uploadFeedback.textContent = 'Nenhum arquivo enviado.';
-    uploadFeedback.style.color = '#64748b';
-    inputUploadExcel.value = '';
   } catch (err) {
     exibirFeedback('error', 'Falha ao Resetar', 'Não foi possível resetar o banco de dados.');
   }

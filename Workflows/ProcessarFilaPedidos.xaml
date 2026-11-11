@@ -9,7 +9,7 @@
   </VisualBasic.Settings>
   <sap2010:WorkflowViewState.IdRef>ProcessarFilaPedidos_1</sap2010:WorkflowViewState.IdRef>
   <TextExpression.NamespacesForImplementation>
-    <scg:List x:TypeArguments="x:String" Capacity="32">
+    <scg:List x:TypeArguments="x:String" Capacity="34">
       <x:String>System.Activities</x:String>
       <x:String>System.Activities.Statements</x:String>
       <x:String>System</x:String>
@@ -26,7 +26,7 @@
     </scg:List>
   </TextExpression.NamespacesForImplementation>
   <TextExpression.ReferencesForImplementation>
-    <scg:List x:TypeArguments="AssemblyReference" Capacity="32">
+    <scg:List x:TypeArguments="AssemblyReference" Capacity="34">
       <AssemblyReference>System.Activities</AssemblyReference>
       <AssemblyReference>Microsoft.VisualBasic</AssemblyReference>
       <AssemblyReference>System.Private.CoreLib</AssemblyReference>
@@ -45,7 +45,7 @@
       <AssemblyReference>UiPath.UIAutomationCore</AssemblyReference>
     </scg:List>
   </TextExpression.ReferencesForImplementation>
-  <Sequence sap2010:Annotation.AnnotationText="Subfluxo RPA: Lê planilha de pedidos, abre o portal web Nexus ERP no navegador, valida regras de negócio e cadastra os pedidos válidos na interface gráfica, capturando o protocolo gerado pelo backend." DisplayName="Processar Fila de Pedidos - Automação Web Visual" sap:VirtualizedContainerService.HintSize="650,2200" sap2010:WorkflowViewState.IdRef="Sequence_2">
+  <Sequence sap2010:Annotation.AnnotationText="Subfluxo RPA: Lê planilha de pedidos, valida regras de negócio com controle de duplicidade no lote, digita os 4 pedidos válidos no Nexus ERP no navegador, captura os protocolos reais e exporta os resultados para o relatório final." DisplayName="Processar Fila de Pedidos - Automação Web Visual" sap:VirtualizedContainerService.HintSize="850,3400" sap2010:WorkflowViewState.IdRef="Sequence_2">
     <Sequence.Variables>
       <Variable x:TypeArguments="sd:DataTable" Name="dtEntrada" />
       <Variable x:TypeArguments="x:String" Name="strPedidoId" />
@@ -55,6 +55,12 @@
       <Variable x:TypeArguments="x:String" Name="strValorUnitario" />
       <Variable x:TypeArguments="x:String" Name="strStatusOrigem" />
       <Variable x:TypeArguments="x:String" Name="strProtocolo" />
+      <Variable x:TypeArguments="x:String" Name="strStatusFinal" />
+      <Variable x:TypeArguments="x:String" Name="strMotivo" />
+      <Variable x:TypeArguments="scg:List(x:String)" Default="[New List(Of String)]" Name="listIdsLote" />
+      <Variable x:TypeArguments="x:String" Default="[&quot;[&quot;]" Name="strJsonResultados" />
+      <Variable x:TypeArguments="x:Int32" Default="0" Name="contadorResultados" />
+      <Variable x:TypeArguments="x:Double" Name="dblTotal" />
     </Sequence.Variables>
     <sap:WorkflowViewStateService.ViewState>
       <scg:Dictionary x:TypeArguments="x:String, x:Object">
@@ -64,8 +70,8 @@
     </sap:WorkflowViewStateService.ViewState>
 
     <!-- 1. Leitura do Excel de entrada -->
-    <ui:LogMessage DisplayName="Log Message - Lendo Excel" sap:VirtualizedContainerService.HintSize="588,92" sap2010:WorkflowViewState.IdRef="LogMessage_3" Level="Info" Message="[&quot;[RPA] Lendo planilha de entrada: &quot; + in_CaminhoEntrada]" />
-    <ui:ReadRange AddHeaders="True" DataTable="[dtEntrada]" DisplayName="Read Range - Pedidos_Input" sap:VirtualizedContainerService.HintSize="588,88" sap2010:WorkflowViewState.IdRef="ReadRange_1" SheetName="Pedidos_Diarios" WorkbookPath="[in_CaminhoEntrada]">
+    <ui:LogMessage DisplayName="Log Message - Lendo Excel" sap:VirtualizedContainerService.HintSize="788,92" sap2010:WorkflowViewState.IdRef="LogMessage_3" Level="Info" Message="[&quot;[RPA] Lendo planilha de entrada: &quot; + in_CaminhoEntrada]" />
+    <ui:ReadRange AddHeaders="True" DataTable="[dtEntrada]" DisplayName="Read Range - Pedidos_Input" sap:VirtualizedContainerService.HintSize="788,88" sap2010:WorkflowViewState.IdRef="ReadRange_1" SheetName="Pedidos_Diarios" WorkbookPath="[in_CaminhoEntrada]">
       <ui:ReadRange.Range>
         <InArgument x:TypeArguments="x:String">
           <Literal x:TypeArguments="x:String" Value="" />
@@ -73,33 +79,33 @@
       </ui:ReadRange.Range>
     </ui:ReadRange>
 
-    <ui:LogMessage DisplayName="Log Message - Total Linhas" sap:VirtualizedContainerService.HintSize="588,92" sap2010:WorkflowViewState.IdRef="LogMessage_4" Level="Info" Message="[&quot;[RPA] Total de pedidos carregados da planilha: &quot; + dtEntrada.Rows.Count.ToString]" />
+    <ui:LogMessage DisplayName="Log Message - Total Linhas" sap:VirtualizedContainerService.HintSize="788,92" sap2010:WorkflowViewState.IdRef="LogMessage_4" Level="Info" Message="[&quot;[RPA] Total de pedidos carregados da planilha: &quot; + dtEntrada.Rows.Count.ToString]" />
 
     <!-- 2. Abertura do Navegador no Nexus ERP -->
-    <ui:OpenBrowser AutomaticallyDownloadWebDriver="{x:Null}" CommunicationMethod="{x:Null}" Hidden="{x:Null}" NewSession="{x:Null}" Private="{x:Null}" UiBrowser="{x:Null}" BrowserType="Chrome" DisplayName="Open Browser - Nexus ERP" sap:VirtualizedContainerService.HintSize="588,1600" sap2010:WorkflowViewState.IdRef="OpenBrowser_1" Url="[in_UrlERP]">
+    <ui:OpenBrowser AutomaticallyDownloadWebDriver="{x:Null}" CommunicationMethod="{x:Null}" Hidden="{x:Null}" NewSession="{x:Null}" Private="{x:Null}" UiBrowser="{x:Null}" BrowserType="Chrome" DisplayName="Open Browser - Nexus ERP" sap:VirtualizedContainerService.HintSize="788,2450" sap2010:WorkflowViewState.IdRef="OpenBrowser_1" Url="[in_UrlERP]">
       <ui:OpenBrowser.Body>
         <ActivityAction x:TypeArguments="x:Object">
           <ActivityAction.Argument>
             <DelegateInArgument x:TypeArguments="x:Object" Name="ContextTarget" />
           </ActivityAction.Argument>
-          <Sequence DisplayName="Interação Web com o Portal" sap:VirtualizedContainerService.HintSize="554,1500" sap2010:WorkflowViewState.IdRef="Sequence_3">
+          <Sequence DisplayName="Interação Web com o Portal" sap:VirtualizedContainerService.HintSize="754,2340" sap2010:WorkflowViewState.IdRef="Sequence_3">
             <sap:WorkflowViewStateService.ViewState>
               <scg:Dictionary x:TypeArguments="x:String, x:Object">
                 <x:Boolean x:Key="IsExpanded">True</x:Boolean>
               </scg:Dictionary>
             </sap:WorkflowViewStateService.ViewState>
             
-            <ui:MaximizeWindow Window="{x:Null}" DisplayName="Maximize Window" sap:VirtualizedContainerService.HintSize="492,25" sap2010:WorkflowViewState.IdRef="MaximizeWindow_1" />
-            <ui:Delay DisplayName="Delay 1s para carregamento do portal" Duration="00:00:01" sap:VirtualizedContainerService.HintSize="492,25" sap2010:WorkflowViewState.IdRef="Delay_1" />
+            <ui:MaximizeWindow Window="{x:Null}" DisplayName="Maximize Window" sap:VirtualizedContainerService.HintSize="692,25" sap2010:WorkflowViewState.IdRef="MaximizeWindow_1" />
+            <ui:Delay DisplayName="Delay 1s para carregamento do portal" Duration="00:00:01" sap:VirtualizedContainerService.HintSize="692,25" sap2010:WorkflowViewState.IdRef="Delay_1" />
 
             <!-- Loop por cada linha da planilha -->
-            <ui:ForEachRow ColumnNames="{x:Null}" CurrentIndex="{x:Null}" DataTable="[dtEntrada]" DisplayName="For Each Row in dtEntrada" sap:VirtualizedContainerService.HintSize="492,1260" sap2010:WorkflowViewState.IdRef="ForEachRow_1">
+            <ui:ForEachRow ColumnNames="{x:Null}" CurrentIndex="{x:Null}" DataTable="[dtEntrada]" DisplayName="For Each Row in dtEntrada" sap:VirtualizedContainerService.HintSize="692,2100" sap2010:WorkflowViewState.IdRef="ForEachRow_1">
               <ui:ForEachRow.Body>
                 <ActivityAction x:TypeArguments="sd:DataRow">
                   <ActivityAction.Argument>
                     <DelegateInArgument x:TypeArguments="sd:DataRow" Name="row" />
                   </ActivityAction.Argument>
-                  <Sequence DisplayName="Auditoria e Preenchimento do Pedido" sap:VirtualizedContainerService.HintSize="458,1140" sap2010:WorkflowViewState.IdRef="Sequence_4">
+                  <Sequence DisplayName="Auditoria e Preenchimento do Pedido" sap:VirtualizedContainerService.HintSize="658,1980" sap2010:WorkflowViewState.IdRef="Sequence_4">
                     <sap:WorkflowViewStateService.ViewState>
                       <scg:Dictionary x:TypeArguments="x:String, x:Object">
                         <x:Boolean x:Key="IsExpanded">True</x:Boolean>
@@ -107,7 +113,7 @@
                     </sap:WorkflowViewStateService.ViewState>
 
                     <!-- Atribuição das variáveis da linha -->
-                    <Assign DisplayName="Assign - strPedidoId" sap:VirtualizedContainerService.HintSize="396,60" sap2010:WorkflowViewState.IdRef="Assign_1">
+                    <Assign DisplayName="Assign - strPedidoId" sap:VirtualizedContainerService.HintSize="596,60" sap2010:WorkflowViewState.IdRef="Assign_1">
                       <Assign.To>
                         <OutArgument x:TypeArguments="x:String">[strPedidoId]</OutArgument>
                       </Assign.To>
@@ -116,7 +122,7 @@
                       </Assign.Value>
                     </Assign>
 
-                    <Assign DisplayName="Assign - strCliente" sap:VirtualizedContainerService.HintSize="396,60" sap2010:WorkflowViewState.IdRef="Assign_2">
+                    <Assign DisplayName="Assign - strCliente" sap:VirtualizedContainerService.HintSize="596,60" sap2010:WorkflowViewState.IdRef="Assign_2">
                       <Assign.To>
                         <OutArgument x:TypeArguments="x:String">[strCliente]</OutArgument>
                       </Assign.To>
@@ -125,7 +131,7 @@
                       </Assign.Value>
                     </Assign>
 
-                    <Assign DisplayName="Assign - strProduto" sap:VirtualizedContainerService.HintSize="396,60" sap2010:WorkflowViewState.IdRef="Assign_3">
+                    <Assign DisplayName="Assign - strProduto" sap:VirtualizedContainerService.HintSize="596,60" sap2010:WorkflowViewState.IdRef="Assign_3">
                       <Assign.To>
                         <OutArgument x:TypeArguments="x:String">[strProduto]</OutArgument>
                       </Assign.To>
@@ -134,7 +140,7 @@
                       </Assign.Value>
                     </Assign>
 
-                    <Assign DisplayName="Assign - strQuantidade" sap:VirtualizedContainerService.HintSize="396,60" sap2010:WorkflowViewState.IdRef="Assign_4">
+                    <Assign DisplayName="Assign - strQuantidade" sap:VirtualizedContainerService.HintSize="596,60" sap2010:WorkflowViewState.IdRef="Assign_4">
                       <Assign.To>
                         <OutArgument x:TypeArguments="x:String">[strQuantidade]</OutArgument>
                       </Assign.To>
@@ -143,7 +149,7 @@
                       </Assign.Value>
                     </Assign>
 
-                    <Assign DisplayName="Assign - strValorUnitario" sap:VirtualizedContainerService.HintSize="396,60" sap2010:WorkflowViewState.IdRef="Assign_5">
+                    <Assign DisplayName="Assign - strValorUnitario" sap:VirtualizedContainerService.HintSize="596,60" sap2010:WorkflowViewState.IdRef="Assign_5">
                       <Assign.To>
                         <OutArgument x:TypeArguments="x:String">[strValorUnitario]</OutArgument>
                       </Assign.To>
@@ -152,7 +158,7 @@
                       </Assign.Value>
                     </Assign>
 
-                    <Assign DisplayName="Assign - strStatusOrigem" sap:VirtualizedContainerService.HintSize="396,60" sap2010:WorkflowViewState.IdRef="Assign_6">
+                    <Assign DisplayName="Assign - strStatusOrigem" sap:VirtualizedContainerService.HintSize="596,60" sap2010:WorkflowViewState.IdRef="Assign_6">
                       <Assign.To>
                         <OutArgument x:TypeArguments="x:String">[strStatusOrigem]</OutArgument>
                       </Assign.To>
@@ -161,77 +167,149 @@
                       </Assign.Value>
                     </Assign>
 
-                    <!-- Verificação das regras de negócio antes do cadastro -->
-                    <If Condition="[strStatusOrigem.Equals(&quot;Cancelado&quot;)]" DisplayName="If - Pedido Cancelado?" sap:VirtualizedContainerService.HintSize="396,52" sap2010:WorkflowViewState.IdRef="If_1">
+                    <Assign DisplayName="Assign - dblTotal" sap:VirtualizedContainerService.HintSize="596,60" sap2010:WorkflowViewState.IdRef="Assign_7">
+                      <Assign.To>
+                        <OutArgument x:TypeArguments="x:Double">[dblTotal]</OutArgument>
+                      </Assign.To>
+                      <Assign.Value>
+                        <InArgument x:TypeArguments="x:Double">[Math.Round(CDbl(strQuantidade) * CDbl(strValorUnitario), 2)]</InArgument>
+                      </Assign.Value>
+                    </Assign>
+
+                    <!-- VALIDAÇÃO 1: Status Origem == Cancelado -->
+                    <If Condition="[strStatusOrigem.Equals(&quot;Cancelado&quot;)]" DisplayName="If - Pedido Cancelado?" sap:VirtualizedContainerService.HintSize="596,1200" sap2010:WorkflowViewState.IdRef="If_1">
                       <If.Then>
-                        <ui:LogMessage DisplayName="Log Ignorado" sap:VirtualizedContainerService.HintSize="334,92" sap2010:WorkflowViewState.IdRef="LogMessage_5" Level="Warn" Message="[&quot;[REGRA DE NEGÓCIO] Pedido &quot; + strPedidoId + &quot; IGNORADO: cancelado na origem.&quot;]" />
+                        <Sequence DisplayName="Tratar Ignorado" sap:VirtualizedContainerService.HintSize="300,200" sap2010:WorkflowViewState.IdRef="Sequence_Ignorado">
+                          <Assign sap:VirtualizedContainerService.HintSize="260,60" sap2010:WorkflowViewState.IdRef="Assign_StatusIgnorado">
+                            <Assign.To><OutArgument x:TypeArguments="x:String">[strStatusFinal]</OutArgument></Assign.To>
+                            <Assign.Value><InArgument x:TypeArguments="x:String">["Ignorado"]</InArgument></Assign.Value>
+                          </Assign>
+                          <Assign sap:VirtualizedContainerService.HintSize="260,60" sap2010:WorkflowViewState.IdRef="Assign_MotivoIgnorado">
+                            <Assign.To><OutArgument x:TypeArguments="x:String">[strMotivo]</OutArgument></Assign.To>
+                            <Assign.Value><InArgument x:TypeArguments="x:String">["Pedido cancelado na origem"]</InArgument></Assign.Value>
+                          </Assign>
+                          <Assign sap:VirtualizedContainerService.HintSize="260,60" sap2010:WorkflowViewState.IdRef="Assign_ProtIgnorado">
+                            <Assign.To><OutArgument x:TypeArguments="x:String">[strProtocolo]</OutArgument></Assign.To>
+                            <Assign.Value><InArgument x:TypeArguments="x:String">["-"]</InArgument></Assign.Value>
+                          </Assign>
+                          <ui:LogMessage DisplayName="Log Ignorado" sap:VirtualizedContainerService.HintSize="260,92" sap2010:WorkflowViewState.IdRef="LogMessage_5" Level="Warn" Message="[&quot;[REGRA DE NEGÓCIO] Pedido &quot; + strPedidoId + &quot; IGNORADO: cancelado na origem.&quot;]" />
+                        </Sequence>
                       </If.Then>
                       <If.Else>
-                        <If Condition="[String.IsNullOrEmpty(strPedidoId) OrElse strCliente.Length &lt; 3 OrElse String.IsNullOrEmpty(strProduto) OrElse CDbl(strQuantidade) &lt;= 0 OrElse CDbl(strValorUnitario) &lt;= 0]" DisplayName="If - Dados Inválidos?" sap:VirtualizedContainerService.HintSize="797,800" sap2010:WorkflowViewState.IdRef="If_2">
+                        <!-- VALIDAÇÃO 2: ID Ausente -->
+                        <If Condition="[String.IsNullOrEmpty(strPedidoId)]" DisplayName="If - ID Ausente?" sap:VirtualizedContainerService.HintSize="518,1000" sap2010:WorkflowViewState.IdRef="If_IdAusente">
                           <If.Then>
-                            <ui:LogMessage DisplayName="Log Rejeitado" sap:VirtualizedContainerService.HintSize="334,92" sap2010:WorkflowViewState.IdRef="LogMessage_6" Level="Warn" Message="[&quot;[REGRA DE NEGÓCIO] Pedido &quot; + strPedidoId + &quot; REJEITADO: Dados inconsistentes na planilha.&quot;]" />
+                            <Sequence DisplayName="Tratar ID Ausente" sap:VirtualizedContainerService.HintSize="300,150" sap2010:WorkflowViewState.IdRef="Sequence_IdAusente">
+                              <Assign sap:VirtualizedContainerService.HintSize="260,60"><Assign.To><OutArgument x:TypeArguments="x:String">[strStatusFinal]</OutArgument></Assign.To><Assign.Value><InArgument x:TypeArguments="x:String">["Rejeitado"]</InArgument></Assign.Value></Assign>
+                              <Assign sap:VirtualizedContainerService.HintSize="260,60"><Assign.To><OutArgument x:TypeArguments="x:String">[strMotivo]</OutArgument></Assign.To><Assign.Value><InArgument x:TypeArguments="x:String">["ID do pedido ausente"]</InArgument></Assign.Value></Assign>
+                              <Assign sap:VirtualizedContainerService.HintSize="260,60"><Assign.To><OutArgument x:TypeArguments="x:String">[strProtocolo]</OutArgument></Assign.To><Assign.Value><InArgument x:TypeArguments="x:String">["-"]</InArgument></Assign.Value></Assign>
+                              <ui:LogMessage DisplayName="Log Rejeitado ID" sap:VirtualizedContainerService.HintSize="260,92" Level="Warn" Message="[&quot;[REGRA DE NEGÓCIO] Pedido REJEITADO: ID ausente na planilha.&quot;]" />
+                            </Sequence>
                           </If.Then>
                           <If.Else>
-                            <!-- Pedido Válido: Preenchimento Visual na Interface Web -->
-                            <Sequence DisplayName="Preenchimento do Formulário Web" sap:VirtualizedContainerService.HintSize="418,650" sap2010:WorkflowViewState.IdRef="Sequence_5">
-                              <ui:LogMessage DisplayName="Log Processando" sap:VirtualizedContainerService.HintSize="356,92" sap2010:WorkflowViewState.IdRef="LogMessage_7" Level="Info" Message="[&quot;[WEB] Preenchendo formulário no Nexus ERP para o pedido: &quot; + strPedidoId]" />
+                            <!-- VALIDAÇÃO 3: ID Duplicado no Lote -->
+                            <If Condition="[listIdsLote.Contains(strPedidoId)]" DisplayName="If - ID Duplicado no Lote?" sap:VirtualizedContainerService.HintSize="484,800" sap2010:WorkflowViewState.IdRef="If_Duplicado">
+                              <If.Then>
+                                <Sequence DisplayName="Tratar Duplicado" sap:VirtualizedContainerService.HintSize="300,150" sap2010:WorkflowViewState.IdRef="Sequence_Duplicado">
+                                  <Assign sap:VirtualizedContainerService.HintSize="260,60"><Assign.To><OutArgument x:TypeArguments="x:String">[strStatusFinal]</OutArgument></Assign.To><Assign.Value><InArgument x:TypeArguments="x:String">["Rejeitado"]</InArgument></Assign.Value></Assign>
+                                  <Assign sap:VirtualizedContainerService.HintSize="260,60"><Assign.To><OutArgument x:TypeArguments="x:String">[strMotivo]</OutArgument></Assign.To><Assign.Value><InArgument x:TypeArguments="x:String">["ID do pedido duplicado no lote"]</InArgument></Assign.Value></Assign>
+                                  <Assign sap:VirtualizedContainerService.HintSize="260,60"><Assign.To><OutArgument x:TypeArguments="x:String">[strProtocolo]</OutArgument></Assign.To><Assign.Value><InArgument x:TypeArguments="x:String">["-"]</InArgument></Assign.Value></Assign>
+                                  <ui:LogMessage DisplayName="Log Duplicado" sap:VirtualizedContainerService.HintSize="260,92" Level="Warn" Message="[&quot;[REGRA DE NEGÓCIO] Pedido &quot; + strPedidoId + &quot; REJEITADO: Duplicado no lote.&quot;]" />
+                                </Sequence>
+                              </If.Then>
+                              <If.Else>
+                                <!-- VALIDAÇÃO 4: Cliente < 3, Produto Vazio, Qtd <= 0 ou Valor <= 0 -->
+                                <If Condition="[strCliente.Length &lt; 3 OrElse String.IsNullOrEmpty(strProduto) OrElse CDbl(strQuantidade) &lt;= 0 OrElse CDbl(strValorUnitario) &lt;= 0]" DisplayName="If - Inconsistências de Campo?" sap:VirtualizedContainerService.HintSize="450,600" sap2010:WorkflowViewState.IdRef="If_2">
+                                  <If.Then>
+                                    <Sequence DisplayName="Tratar Dados Inconsistentes" sap:VirtualizedContainerService.HintSize="300,150" sap2010:WorkflowViewState.IdRef="Sequence_Inconsistente">
+                                      <Assign sap:VirtualizedContainerService.HintSize="260,60"><Assign.To><OutArgument x:TypeArguments="x:String">[strStatusFinal]</OutArgument></Assign.To><Assign.Value><InArgument x:TypeArguments="x:String">["Rejeitado"]</InArgument></Assign.Value></Assign>
+                                      <Assign sap:VirtualizedContainerService.HintSize="260,60"><Assign.To><OutArgument x:TypeArguments="x:String">[strMotivo]</OutArgument></Assign.To><Assign.Value><InArgument x:TypeArguments="x:String">[If(strCliente.Length &lt; 3, "Nome do cliente inválido (mínimo 3 caracteres)", If(String.IsNullOrEmpty(strProduto), "Produto não informado", If(CDbl(strQuantidade) &lt;= 0, "Quantidade menor ou igual a zero", "Valor unitário menor ou igual a zero")))]</InArgument></Assign.Value></Assign>
+                                      <Assign sap:VirtualizedContainerService.HintSize="260,60"><Assign.To><OutArgument x:TypeArguments="x:String">[strProtocolo]</OutArgument></Assign.To><Assign.Value><InArgument x:TypeArguments="x:String">["-"]</InArgument></Assign.Value></Assign>
+                                      <ui:LogMessage DisplayName="Log Rejeitado Campos" sap:VirtualizedContainerService.HintSize="260,92" Level="Warn" Message="[&quot;[REGRA DE NEGÓCIO] Pedido &quot; + strPedidoId + &quot; REJEITADO: &quot; + strMotivo]" />
+                                    </Sequence>
+                                  </If.Then>
+                                  <If.Else>
+                                    <!-- PEDIDO VÁLIDO: Automação Web no Nexus ERP -->
+                                    <Sequence DisplayName="Preenchimento do Formulário Web" sap:VirtualizedContainerService.HintSize="418,950" sap2010:WorkflowViewState.IdRef="Sequence_5">
+                                      <!-- Registra ID no conjunto do lote -->
+                                      <AddToCollection x:TypeArguments="x:String" Collection="[listIdsLote]" DisplayName="Add to listIdsLote" Item="[strPedidoId]" sap:VirtualizedContainerService.HintSize="356,25" />
 
-                              <ui:TypeInto AlterIfDisabled="{x:Null}" ClickBeforeTyping="{x:Null}" DelayBefore="{x:Null}" DelayBetweenKeys="{x:Null}" DelayMS="{x:Null}" Activate="True" DisplayName="Type Into - ID Pedido" EmptyField="True" sap:VirtualizedContainerService.HintSize="356,115" sap2010:WorkflowViewState.IdRef="TypeInto_1" SendWindowMessages="False" SimulateType="True" Text="[strPedidoId]">
-                                <ui:TypeInto.Target>
-                                  <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Id="target_id" Selector="&lt;html app='*' title='*Nexus ERP*' /&gt;&lt;webctrl id='input-pedido-id' tag='INPUT' /&gt;" TimeoutMS="3000" WaitForReady="COMPLETE" />
-                                </ui:TypeInto.Target>
-                              </ui:TypeInto>
+                                      <ui:LogMessage DisplayName="Log Processando" sap:VirtualizedContainerService.HintSize="356,92" sap2010:WorkflowViewState.IdRef="LogMessage_7" Level="Info" Message="[&quot;[WEB] Preenchendo formulário no Nexus ERP para o pedido: &quot; + strPedidoId]" />
 
-                              <ui:TypeInto AlterIfDisabled="{x:Null}" ClickBeforeTyping="{x:Null}" DelayBefore="{x:Null}" DelayBetweenKeys="{x:Null}" DelayMS="{x:Null}" Activate="True" DisplayName="Type Into - Cliente" EmptyField="True" sap:VirtualizedContainerService.HintSize="356,115" sap2010:WorkflowViewState.IdRef="TypeInto_2" SendWindowMessages="False" SimulateType="True" Text="[strCliente]">
-                                <ui:TypeInto.Target>
-                                  <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Id="target_cliente" Selector="&lt;html app='*' title='*Nexus ERP*' /&gt;&lt;webctrl id='input-cliente-nome' tag='INPUT' /&gt;" TimeoutMS="3000" WaitForReady="COMPLETE" />
-                                </ui:TypeInto.Target>
-                              </ui:TypeInto>
+                                      <ui:TypeInto AlterIfDisabled="{x:Null}" ClickBeforeTyping="{x:Null}" DelayBefore="{x:Null}" DelayBetweenKeys="{x:Null}" DelayMS="{x:Null}" Activate="True" DisplayName="Type Into - ID Pedido" EmptyField="True" sap:VirtualizedContainerService.HintSize="356,115" sap2010:WorkflowViewState.IdRef="TypeInto_1" SendWindowMessages="False" SimulateType="True" Text="[strPedidoId]">
+                                        <ui:TypeInto.Target>
+                                          <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Id="target_id" Selector="&lt;html app='*' title='*Nexus ERP*' /&gt;&lt;webctrl id='input-pedido-id' tag='INPUT' /&gt;" TimeoutMS="3000" WaitForReady="COMPLETE" />
+                                        </ui:TypeInto.Target>
+                                      </ui:TypeInto>
 
-                              <ui:TypeInto AlterIfDisabled="{x:Null}" ClickBeforeTyping="{x:Null}" DelayBefore="{x:Null}" DelayBetweenKeys="{x:Null}" DelayMS="{x:Null}" Activate="True" DisplayName="Type Into - Produto" EmptyField="True" sap:VirtualizedContainerService.HintSize="356,115" sap2010:WorkflowViewState.IdRef="TypeInto_3" SendWindowMessages="False" SimulateType="True" Text="[strProduto]">
-                                <ui:TypeInto.Target>
-                                  <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Id="target_produto" Selector="&lt;html app='*' title='*Nexus ERP*' /&gt;&lt;webctrl id='input-produto' tag='INPUT' /&gt;" TimeoutMS="3000" WaitForReady="COMPLETE" />
-                                </ui:TypeInto.Target>
-                              </ui:TypeInto>
+                                      <ui:TypeInto AlterIfDisabled="{x:Null}" ClickBeforeTyping="{x:Null}" DelayBefore="{x:Null}" DelayBetweenKeys="{x:Null}" DelayMS="{x:Null}" Activate="True" DisplayName="Type Into - Cliente" EmptyField="True" sap:VirtualizedContainerService.HintSize="356,115" sap2010:WorkflowViewState.IdRef="TypeInto_2" SendWindowMessages="False" SimulateType="True" Text="[strCliente]">
+                                        <ui:TypeInto.Target>
+                                          <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Id="target_cliente" Selector="&lt;html app='*' title='*Nexus ERP*' /&gt;&lt;webctrl id='input-cliente-nome' tag='INPUT' /&gt;" TimeoutMS="3000" WaitForReady="COMPLETE" />
+                                        </ui:TypeInto.Target>
+                                      </ui:TypeInto>
 
-                              <ui:TypeInto AlterIfDisabled="{x:Null}" ClickBeforeTyping="{x:Null}" DelayBefore="{x:Null}" DelayBetweenKeys="{x:Null}" DelayMS="{x:Null}" Activate="True" DisplayName="Type Into - Quantidade" EmptyField="True" sap:VirtualizedContainerService.HintSize="356,115" sap2010:WorkflowViewState.IdRef="TypeInto_4" SendWindowMessages="False" SimulateType="True" Text="[strQuantidade]">
-                                <ui:TypeInto.Target>
-                                  <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Id="target_qtd" Selector="&lt;html app='*' title='*Nexus ERP*' /&gt;&lt;webctrl id='input-quantidade' tag='INPUT' /&gt;" TimeoutMS="3000" WaitForReady="COMPLETE" />
-                                </ui:TypeInto.Target>
-                              </ui:TypeInto>
+                                      <ui:TypeInto AlterIfDisabled="{x:Null}" ClickBeforeTyping="{x:Null}" DelayBefore="{x:Null}" DelayBetweenKeys="{x:Null}" DelayMS="{x:Null}" Activate="True" DisplayName="Type Into - Produto" EmptyField="True" sap:VirtualizedContainerService.HintSize="356,115" sap2010:WorkflowViewState.IdRef="TypeInto_3" SendWindowMessages="False" SimulateType="True" Text="[strProduto]">
+                                        <ui:TypeInto.Target>
+                                          <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Id="target_produto" Selector="&lt;html app='*' title='*Nexus ERP*' /&gt;&lt;webctrl id='input-produto' tag='INPUT' /&gt;" TimeoutMS="3000" WaitForReady="COMPLETE" />
+                                        </ui:TypeInto.Target>
+                                      </ui:TypeInto>
 
-                              <ui:TypeInto AlterIfDisabled="{x:Null}" ClickBeforeTyping="{x:Null}" DelayBefore="{x:Null}" DelayBetweenKeys="{x:Null}" DelayMS="{x:Null}" Activate="True" DisplayName="Type Into - Valor Unitario" EmptyField="True" sap:VirtualizedContainerService.HintSize="356,115" sap2010:WorkflowViewState.IdRef="TypeInto_5" SendWindowMessages="False" SimulateType="True" Text="[strValorUnitario]">
-                                <ui:TypeInto.Target>
-                                  <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Id="target_valor" Selector="&lt;html app='*' title='*Nexus ERP*' /&gt;&lt;webctrl id='input-valor-unitario' tag='INPUT' /&gt;" TimeoutMS="3000" WaitForReady="COMPLETE" />
-                                </ui:TypeInto.Target>
-                              </ui:TypeInto>
+                                      <ui:TypeInto AlterIfDisabled="{x:Null}" ClickBeforeTyping="{x:Null}" DelayBefore="{x:Null}" DelayBetweenKeys="{x:Null}" DelayMS="{x:Null}" Activate="True" DisplayName="Type Into - Quantidade" EmptyField="True" sap:VirtualizedContainerService.HintSize="356,115" sap2010:WorkflowViewState.IdRef="TypeInto_4" SendWindowMessages="False" SimulateType="True" Text="[strQuantidade]">
+                                        <ui:TypeInto.Target>
+                                          <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Id="target_qtd" Selector="&lt;html app='*' title='*Nexus ERP*' /&gt;&lt;webctrl id='input-quantidade' tag='INPUT' /&gt;" TimeoutMS="3000" WaitForReady="COMPLETE" />
+                                        </ui:TypeInto.Target>
+                                      </ui:TypeInto>
 
-                              <!-- Clique no botão Cadastrar -->
-                              <ui:Click AlterIfDisabled="{x:Null}" DelayBefore="{x:Null}" DelayMS="{x:Null}" SendWindowMessages="{x:Null}" ClickType="CLICK_SINGLE" DisplayName="Click - Cadastrar Pedido" sap:VirtualizedContainerService.HintSize="356,106" sap2010:WorkflowViewState.IdRef="Click_1" KeyModifiers="None" MouseButton="BTN_LEFT" SimulateClick="True">
-                                <ui:Click.Target>
-                                  <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Id="target_btn" Selector="&lt;html app='*' title='*Nexus ERP*' /&gt;&lt;webctrl id='btn-cadastrar' tag='BUTTON' /&gt;" TimeoutMS="3000" WaitForReady="COMPLETE" />
-                                </ui:Click.Target>
-                              </ui:Click>
+                                      <ui:TypeInto AlterIfDisabled="{x:Null}" ClickBeforeTyping="{x:Null}" DelayBefore="{x:Null}" DelayBetweenKeys="{x:Null}" DelayMS="{x:Null}" Activate="True" DisplayName="Type Into - Valor Unitario" EmptyField="True" sap:VirtualizedContainerService.HintSize="356,115" sap2010:WorkflowViewState.IdRef="TypeInto_5" SendWindowMessages="False" SimulateType="True" Text="[strValorUnitario]">
+                                        <ui:TypeInto.Target>
+                                          <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Id="target_valor" Selector="&lt;html app='*' title='*Nexus ERP*' /&gt;&lt;webctrl id='input-valor-unitario' tag='INPUT' /&gt;" TimeoutMS="3000" WaitForReady="COMPLETE" />
+                                        </ui:TypeInto.Target>
+                                      </ui:TypeInto>
 
-                              <!-- Delay curto para aguardar resposta do backend SQLite -->
-                              <ui:Delay DisplayName="Delay 1s para geração do protocolo" Duration="00:00:01" sap:VirtualizedContainerService.HintSize="356,25" sap2010:WorkflowViewState.IdRef="Delay_2" />
+                                      <!-- Clique no botão Cadastrar -->
+                                      <ui:Click AlterIfDisabled="{x:Null}" DelayBefore="{x:Null}" DelayMS="{x:Null}" SendWindowMessages="{x:Null}" ClickType="CLICK_SINGLE" DisplayName="Click - Cadastrar Pedido" sap:VirtualizedContainerService.HintSize="356,106" sap2010:WorkflowViewState.IdRef="Click_1" KeyModifiers="None" MouseButton="BTN_LEFT" SimulateClick="True">
+                                        <ui:Click.Target>
+                                          <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Id="target_btn" Selector="&lt;html app='*' title='*Nexus ERP*' /&gt;&lt;webctrl id='btn-cadastrar' tag='BUTTON' /&gt;" TimeoutMS="3000" WaitForReady="COMPLETE" />
+                                        </ui:Click.Target>
+                                      </ui:Click>
 
-                              <!-- Captura do Protocolo emitido pelo backend -->
-                              <ui:GetValue ContinueOnError="True" DisplayName="Get Text - Protocolo Oficial" sap:VirtualizedContainerService.HintSize="356,106" sap2010:WorkflowViewState.IdRef="GetValue_1">
-                                <ui:GetValue.Target>
-                                  <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Id="target_protocolo" Selector="&lt;html app='*' title='*Nexus ERP*' /&gt;&lt;webctrl id='numero-protocolo' tag='SPAN' /&gt;" TimeoutMS="3000" WaitForReady="COMPLETE" />
-                                </ui:GetValue.Target>
-                                <ui:GetValue.Value>
-                                  <OutArgument x:TypeArguments="x:String">[strProtocolo]</OutArgument>
-                                </ui:GetValue.Value>
-                              </ui:GetValue>
+                                      <!-- Delay curto para aguardar resposta do backend SQLite -->
+                                      <ui:Delay DisplayName="Delay 1s para geração do protocolo" Duration="00:00:01" sap:VirtualizedContainerService.HintSize="356,25" sap2010:WorkflowViewState.IdRef="Delay_2" />
 
-                              <ui:LogMessage DisplayName="Log Sucesso" sap:VirtualizedContainerService.HintSize="356,92" sap2010:WorkflowViewState.IdRef="LogMessage_8" Level="Info" Message="[&quot;[SUCESSO] Pedido &quot; + strPedidoId + &quot; faturado! Protocolo capturado da tela: &quot; + strProtocolo]" />
-                            </Sequence>
+                                      <!-- Captura do Protocolo emitido pelo backend -->
+                                      <ui:GetValue ContinueOnError="True" DisplayName="Get Text - Protocolo Oficial" sap:VirtualizedContainerService.HintSize="356,106" sap2010:WorkflowViewState.IdRef="GetValue_1">
+                                        <ui:GetValue.Target>
+                                          <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Id="target_protocolo" Selector="&lt;html app='*' title='*Nexus ERP*' /&gt;&lt;webctrl id='numero-protocolo' tag='SPAN' /&gt;" TimeoutMS="3000" WaitForReady="COMPLETE" />
+                                        </ui:GetValue.Target>
+                                        <ui:GetValue.Value>
+                                          <OutArgument x:TypeArguments="x:String">[strProtocolo]</OutArgument>
+                                        </ui:GetValue.Value>
+                                      </ui:GetValue>
+
+                                      <Assign sap:VirtualizedContainerService.HintSize="356,60"><Assign.To><OutArgument x:TypeArguments="x:String">[strStatusFinal]</OutArgument></Assign.To><Assign.Value><InArgument x:TypeArguments="x:String">["Sucesso"]</InArgument></Assign.Value></Assign>
+                                      <Assign sap:VirtualizedContainerService.HintSize="356,60"><Assign.To><OutArgument x:TypeArguments="x:String">[strMotivo]</OutArgument></Assign.To><Assign.Value><InArgument x:TypeArguments="x:String">["Cadastrado e faturado com sucesso no Nexus ERP"]</InArgument></Assign.Value></Assign>
+
+                                      <ui:LogMessage DisplayName="Log Sucesso" sap:VirtualizedContainerService.HintSize="356,92" sap2010:WorkflowViewState.IdRef="LogMessage_8" Level="Info" Message="[&quot;[SUCESSO] Pedido &quot; + strPedidoId + &quot; faturado! Protocolo capturado da tela: &quot; + strProtocolo]" />
+                                    </Sequence>
+                                  </If.Else>
+                                </If>
+                              </If.Else>
+                            </If>
                           </If.Else>
                         </If>
                       </If.Else>
                     </If>
+
+                    <!-- Acúmulo do registro no JSON de evidências UiPath -->
+                    <Assign DisplayName="Acumular JSON" sap:VirtualizedContainerService.HintSize="596,60">
+                      <Assign.To><OutArgument x:TypeArguments="x:String">[strJsonResultados]</OutArgument></Assign.To>
+                      <Assign.Value><InArgument x:TypeArguments="x:String">[strJsonResultados + If(contadorResultados &gt; 0, ",", "") + "{""pedido_id"":""" + strPedidoId + """,""cliente"":""" + strCliente + """,""produto"":""" + strProduto + """,""quantidade"":" + strQuantidade + ",""valor_unitario"":" + strValorUnitario + ",""total"":" + dblTotal.ToString("F2").Replace(",",".") + ",""status_origem"":""" + strStatusOrigem + """,""status_final"":""" + strStatusFinal + """,""protocolo"":""" + strProtocolo + """,""motivo"":""" + strMotivo + """,""data_proc"":""" + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss") + """}"]</InArgument></Assign.Value>
+                    </Assign>
+                    <Assign sap:VirtualizedContainerService.HintSize="596,60">
+                      <Assign.To><OutArgument x:TypeArguments="x:Int32">[contadorResultados]</OutArgument></Assign.To>
+                      <Assign.Value><InArgument x:TypeArguments="x:Int32">[contadorResultados + 1]</InArgument></Assign.Value>
+                    </Assign>
+
                   </Sequence>
                 </ActivityAction>
               </ui:ForEachRow.Body>
@@ -240,5 +318,17 @@
         </ActivityAction>
       </ui:OpenBrowser.Body>
     </ui:OpenBrowser>
+
+    <!-- 3. Finalização: Salva o JSON de evidências reais do UiPath -->
+    <Assign DisplayName="Fechar JSON" sap:VirtualizedContainerService.HintSize="788,60">
+      <Assign.To><OutArgument x:TypeArguments="x:String">[strJsonResultados]</OutArgument></Assign.To>
+      <Assign.Value><InArgument x:TypeArguments="x:String">[strJsonResultados + "]"]</InArgument></Assign.Value>
+    </Assign>
+    <ui:WriteTextFile DisplayName="Write Text File - Evidências UiPath" FileName="Data\Temp\resultados_execucao_uipath.json" sap:VirtualizedContainerService.HintSize="788,135" Text="[strJsonResultados]" />
+
+    <!-- 4. Consolidação Oficial do Relatório multi-abas a partir dos dados do UiPath -->
+    <ui:LogMessage DisplayName="Log Consolidando Relatório" sap:VirtualizedContainerService.HintSize="788,92" Level="Info" Message="[&quot;[RPA] Consolidando relatório multi-abas a partir dos protocolos e resultados capturados pelo UiPath...&quot;]" />
+    <ui:StartProcess Arguments="gerar_relatorio_uipath.py" DisplayName="Start Process - Consolidar Relatorio" FileName="python.exe" sap:VirtualizedContainerService.HintSize="788,88" />
+
   </Sequence>
 </Activity>
