@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Currículo - Filipe Alves | RPA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background: #cbd5e1;
+      color: #1e293b;
+      font-size: 9.8pt;
+      line-height: 1.65;
+      padding: 30px 0;
+    }
+
+    /* Folha A4 com distribuição harmoniosa */
+    .page {
+      background: #ffffff;
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      padding: 26mm 24mm;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    @media print {
+      body {
+        background: none;
+        padding: 0;
+      }
+      .page {
+        width: 100%;
+        min-height: 100%;
+        margin: 0;
+        padding: 18mm 20mm;
+        box-shadow: none;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+
+    /* Botão de impressão */
+    .no-print {
+      max-width: 210mm;
+      margin: 0 auto 16px auto;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .btn-pdf {
+      background: #0284c7;
+      color: white;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+      box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3);
+      transition: background 0.2s;
+    }
+
+    .btn-pdf:hover {
+      background: #0369a1;
+    }
+
+    /* Cabeçalho */
+    header {
+      border-bottom: 2.5px solid #0284c7;
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    h1 {
+      font-size: 24pt;
+      color: #0f172a;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .role {
+      font-size: 13pt;
+      color: #0284c7;
+      font-weight: 600;
+      margin-top: 6px;
+    }
+
+    .contacts {
+      text-align: right;
+      font-size: 9.2pt;
+      color: #475569;
+      line-height: 1.6;
+    }
+
+    /* Seções com espaçamento arejado */
+    section {
+      margin-bottom: 30px;
+    }
+
+    section:last-child {
+      margin-bottom: 0;
+    }
+
+    h2 {
+      font-size: 11.5pt;
+      font-weight: 700;
+      color: #0f172a;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 12px;
+      border-bottom: 1.5px solid #e2e8f0;
+      padding-bottom: 5px;
+    }
+
+    p {
+      color: #334155;
+      font-size: 9.6pt;
+      line-height: 1.65;
+    }
+
+    /* Tags de Competências */
+    .skills-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .tag {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 9pt;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .tag.highlight {
+      background: #e0f2fe;
+      border-color: #bae6fd;
+      color: #0369a1;
+    }
+
+    /* Projetos */
+    .project {
+      margin-top: 14px;
+    }
+
+    .project-header {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 700;
+      font-size: 10.5pt;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+
+    .project-stack {
+      color: #0284c7;
+      font-size: 9pt;
+      font-weight: 600;
+    }
+
+    ul {
+      list-style-type: square;
+      padding-left: 20px;
+      margin-top: 10px;
+    }
+
+    li {
+      margin-bottom: 10px;
+      font-size: 9.3pt;
+      color: #334155;
+      line-height: 1.55;
+    }
+
+    li:last-child {
+      margin-bottom: 0;
+    }
+
+    li strong {
+      color: #0f172a;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="no-print">
+    <button class="btn-pdf" onclick="window.print()">🖨️ Salvar como PDF</button>
+  </div>
+
+  <div class="page">
+    
+    <!-- Cabeçalho -->
+    <header>
+      <div>
+        <h1>Filipe Alves</h1>
+        <div class="role">Analista de RPA Júnior</div>
+      </div>
+      <div class="contacts">
+        <div>filipealvesrds2019@gmail.com</div>
+        <div>linkedin.com/in/filipe-alves • github.com/filipealves</div>
+        <div>Remoto / Híbrido • Brasil</div>
+      </div>
+    </header>
+
+    <!-- Resumo Direto -->
+    <section>
+      <h2>Resumo Profissional</h2>
+      <p>
+        Desenvolvedor focado em automação de processos (RPA) com <strong>UiPath Studio</strong> e <strong>Python</strong>. Experiência prática no desenvolvimento de robôs e fluxos de automação para leitura e validação de planilhas Excel, automação web (preenchimento de formulários e extração de dados em sistemas legados sem API) e geração de relatórios gerenciais de conformidade.
+      </p>
+    </section>
+
+    <!-- Competências Chave Arejadas -->
+    <section>
+      <h2>Competências Principais</h2>
+      <div class="skills-container">
+        <span class="tag highlight">UiPath Studio</span>
+        <span class="tag highlight">Automação Web (DOM / Seletores)</span>
+        <span class="tag highlight">Excel & DataTables</span>
+        <span class="tag highlight">Validação de Regras de Negócio</span>
+        <span class="tag">Type Into / Click / Get Text</span>
+        <span class="tag">Tratamento de Exceções</span>
+        <span class="tag">Python (Automação & Dados)</span>
+        <span class="tag">SQLite / SQL Básico</span>
+        <span class="tag">Git & GitHub</span>
+      </div>
+    </section>
+
+    <!-- Projetos Práticos (Portfólio) -->
+    <section>
+      <h2>Projetos Práticos (Portfólio)</h2>
+      
+      <div class="project">
+        <div class="project-header">
+          <span>Automação de Faturamento e Cadastro em ERP Legado</span>
+          <span class="project-stack">UiPath • Excel • Python • SQLite</span>
+        </div>
+        <p style="margin-top: 6px;">
+          Solução RPA desenvolvida para eliminar o processo manual de digitação de pedidos em um ERP web corporativo sem API de integração.
+        </p>
+        <ul>
+          <li><strong>Leitura & Validação em Lote:</strong> Lê planilha Excel (<code>Pedidos_Input.xlsx</code>) e filtra pedidos cancelados, IDs duplicados no lote e inconsistências de valores/quantidade.</li>
+          <li><strong>Automação Web no Navegador:</strong> Abre o Google Chrome, acessa o ERP corporativo e digita campo a campo os dados válidos, acionando a emissão do pedido.</li>
+          <li><strong>Captura de Protocolos:</strong> Extrai da tela via <code>Get Text</code> o código de protocolo gerado pelo sistema (ex: <code>PRT-2026-XXXXXX</code>) para garantir rastreabilidade.</li>
+          <li><strong>Relatório Executivo:</strong> Gera relatório gerencial em Excel com abas separadas de Sucessos, Rejeitados por regra e Ignorados com formatação condicional por cores.</li>
+        </ul>
+      </div>
+
+      <div class="project" style="margin-top: 20px;">
+        <div class="project-header">
+          <span>Automação de Tratamento e Limpeza de Dados</span>
+          <span class="project-stack">Python • Excel • SQL</span>
+        </div>
+        <ul>
+          <li>Higienização de dados brutos com remoção automática de inconsistências, duplicidades e formatação monetária.</li>
+          <li>Carga e persistência em banco relacional SQLite garantindo unicidade e integridade dos registros.</li>
+        </ul>
+      </div>
+    </section>
+
+  </div>
+
+</body>
+</html>
